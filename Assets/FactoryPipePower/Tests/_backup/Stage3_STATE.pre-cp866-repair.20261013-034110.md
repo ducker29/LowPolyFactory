@@ -1,0 +1,323 @@
+# Stage 3 тАФ STATE SNAPSHOT (╨╖╨░╤Д╨╕╨║╤Б╨╕╤А╨╛╨▓╨░╨╜╨╛ 2026-10-09, ╨╛╨▒╨╜╨╛╨▓╨╗╨╡╨╜╨╛ 2026-10-12, ╨н╤В╨░╨┐ 9)
+
+╨Я╤А╨╛╨╡╨║╤В: `E:\UnityProjects\LowPolyFactory` ┬╖ Unity 6000.6.0f1
+Authoritative spec: `factory-pipe-techdoc.md` ┬╖ ╨Я╤А╨░╨▓╨╕╨╗╨░: `AGENTS.md`
+╨з╨╡╨║╨┐╨╛╨╕╨╜╤В-╨┤╨╜╨╡╨▓╨╜╨╕╨║: `Assets/FactoryPipePower/Tests/Stage3_PROGRESS.md`
+
+**╨б╤В╨░╤В╤Г╤Б: ╨н╤В╨░╨┐╤Л 3тАУ8 ╨Я╨а╨Ш╨Э╨п╨в╨л. ╨н╤В╨░╨┐ 9 (Tutorial overlay / TutorialController) ╨Ч╨Р╨Т╨Х╨а╨и╨Б╨Э, ╨╛╤В╤З╤С╤В ╨▓╤Л╨┤╨░╨╜, ╨Ю╨Ц╨Ш╨Ф╨Р╨Х╨в╨б╨п ╨┐╨╛╨┤╤В╨▓╨╡╤А╨╢╨┤╨╡╨╜╨╕╨╡ ╨┐╨╛╨╗╤М╨╖╨╛╨▓╨░╤В╨╡╨╗╤П. ╨н╤В╨░╨┐ 10 (CTA/GameFlow) ╨╕ ╨н╤В╨░╨┐ 11 (PlayableScene) ╨Э╨Х ╨╜╨░╤З╨░╤В╤Л тАФ ╨╖╨░╨┐╤А╨╡╤Й╨╡╨╜╤Л ╨┤╨╛ ╨┐╨╛╨┤╤В╨▓╨╡╤А╨╢╨┤╨╡╨╜╨╕╤П.**
+
+---
+
+## 0. ╨н╤В╨░╨┐ 9 тАФ ╤З╤В╨╛ ╨┤╨╛╨▒╨░╨▓╨╗╨╡╨╜╨╛ (2026-10-12, ╨╖╨░╨▓╨╡╤А╤И╤С╨╜, ╨╢╨┤╤С╤В ╨┐╨╛╨┤╤В╨▓╨╡╤А╨╢╨┤╨╡╨╜╨╕╤П)
+
+### Shader / ╨╝╨░╤В╨╡╤А╨╕╨░╨╗
+- **╨б╨╛╨╖╨┤╨░╨╜** `Assets/FactoryPipePower/Shaders/TutorialOverlay.shader` (`FactoryPipePower/TutorialOverlay`): URP, Transparent, `Blend SrcAlpha OneMinusSrcAlpha`, `ZWrite Off`, `ZTest LEqual`, Queue `Transparent+100` (=3100, ╨┐╨╛╨╖╨╢╨╡ ╨▓╤Б╨╡╤Е base materials), `SRPDefaultUnlit`; ╤Б╨▓╨╛╨╣╤Б╤В╨▓╨░ `_OverlayColor/_MinAlpha/_MaxAlpha/_PulseSpeed/_EmissionStrength/_DepthOffset`; ╨┐╤Г╨╗╤М╤Б `pulse01 = 0.5 + 0.5*sin(_Time.y*_PulseSpeed)`, `alpha = lerp(_MinAlpha,_MaxAlpha,pulse01)` тАФ ╤Ж╨╡╨╗╨╕╨║╨╛╨╝ ╨▓ shader time (╨╜╨╕╨║╨░╨║╨╕╤Е per-frame material updates ╨╕╨╖ C#); depth bias ╨▓ vertex (`positionCS.z -= _DepthOffset*positionCS.w`) ╨┐╤А╨╛╤В╨╕╨▓ z-fighting. HasErrors=False, supported=True.
+- **╨Ь╨╕╨│╤А╨╕╤А╨╛╨▓╨░╨╜** `M_TutorialOverlay.mat`: shader URP/Unlit тЖТ `FactoryPipePower/TutorialOverlay`; `_OverlayColor=(1,0.85,0.1)`, `_MinAlpha=0.2`, `_MaxAlpha=0.6`, `_PulseSpeed=4`, `_EmissionStrength=0.8`, `_DepthOffset=0.001`. ╨г╨╢╨╡ ╨╜╨░╨╖╨╜╨░╤З╨╡╨╜ ╨▓╨╛ ╨▓╤Б╨╡╤Е 4 ╨┐╤А╨╡╤Д╨░╨▒╨░╤Е ╨║╨░╨║ `tutorialOverlayMaterial` (guid ╨╜╨╡ ╨╝╨╡╨╜╤П╨╗╤Б╤П тАФ ╨╝╨╕╨│╤А╨░╤Ж╨╕╤П on-place).
+
+### Production-╨║╨╛╨┤ (╨║╨╛╨╝╨┐╨╕╨╗╨╕╤А╤Г╨╡╤В╤Б╤П ╤З╨╕╤Б╤В╨╛)
+- **╨б╨╛╨╖╨┤╨░╨╜** `Assets/FactoryPipePower/Scripts/Tutorial/TutorialController.cs` тАФ enum `TutorialStep {None, HighlightPipe, HighlightSlot, HighlightRotation, Complete}`; ╨┐╨╛╨╗╤П `tutorialPipe/tutorialSlot`; API `CurrentStep, InitializeTutorial(), ResetTutorial(), DisableTutorial(), IsSubscribed`; ╨┐╨╛╨┤╨┐╨╕╤Б╨║╨╕ ╤В╨╛╨╗╤М╨║╨╛ ╨╜╨░ ╨╜╨░╨╖╨╜╨░╤З╨╡╨╜╨╜╤Л╨╡ ╨╛╨▒╤К╨╡╨║╤В╤Л (╨╜╨╕╨║╨░╨║╨╛╨│╨╛ polling, ╨╜╨╕╨║╨░╨║╨╛╨│╨╛ registry); ╨╕╨┤╨╡╨╝╨┐╨╛╤В╨╡╨╜╤В╨╜╤Л╨╡ Subscribe/Unsubscribe (guard `subscribed`); OnDisable/OnDestroy тЖТ Unsubscribe; null-refs тЖТ `None` ╨▒╨╡╨╖ exception ╨╕ ╨▒╨╡╨╖ LogError; ╨╜╨╡╤Б╨╛╨▓╨╝╨╡╤Б╤В╨╕╨╝╤Л╨╣ PipeSpec тЖТ ╤А╨╛╨▓╨╜╨╛ ╨╛╨┤╨╕╨╜ `Debug.LogError("Tutorial configuration errorтАж")` + `None`; ╨┐╨╛╤Б╨╗╨╡ Complete тЖТ Unsubscribe (late events ╨╕╨│╨╜╨╕╤А╤Г╤О╤В╤Б╤П); ╤Б╨╛╤Б╤В╨╛╤П╨╜╨╕╤П Charging/Powered ╨╜╨╕╨║╨╛╨│╨┤╨░ ╨╜╨╡ ╨┐╨╛╨╗╤Г╤З╨░╤О╤В overlay; ╨▓╨╗╨░╨┤╨╡╨╡╤В ╨в╨Ю╨Ы╨м╨Ъ╨Ю `Visual.SetTutorialOverlay(...)`, ╨╜╨╡ ╤В╤А╨╛╨│╨░╨╡╤В base material/fill/flow/FSM/registry.
+- **╨Ш╨╖╨╝╨╡╨╜╤С╨╜** `DraggablePipeController.cs` тАФ `public PipeVisualController Visual`; instance-╤Б╨╛╨▒╤Л╤В╨╕╤П `DragStarted` (BeginDrag, ├Ч1), `ReturnedToStock` (EndDragWithoutPlacement тЖТ ╨▓╤Е╨╛╨┤ ╨▓ Returning, ├Ч1); ╤Б╤В╨░╤В╨╕╤З╨╡╤Б╨║╨╕╨╡ AnyDragStarted/AnyDragFinished ╨╕ `Committed` ╨╜╨╡ ╤В╤А╨╛╨╜╤Г╤В╤Л. Placement-signal ╨┤╨╗╤П tutorial = slot-╤Б╨╛╨▒╤Л╤В╨╕╨╡ `StateChanged`, ╨╜╨╡ `Committed`.
+- **╨Ш╨╖╨╝╨╡╨╜╤С╨╜** `PipeSlotController.cs` тАФ `public PipeVisualController Visual`; instance-╤Б╨╛╨▒╤Л╤В╨╕╨╡ `StateChanged(slot, PipeSlotState)` (╤Б╤В╤А╨╡╨╗╤П╨╡╤В ╨▓ `SetState` ╨в╨Ю╨Ы╨м╨Ъ╨Ю ╨┐╤А╨╕ ╤А╨╡╨░╨╗╤М╨╜╨╛╨╝ ╨╕╨╖╨╝╨╡╨╜╨╡╨╜╨╕╨╕ state); **╤Г╨┤╨░╨╗╤С╨╜** `slotVisual.SetTutorialOverlay(false)` ╨╕╨╖ `TryAccept` (overlay-clear ╨▓╤Е╨╛╨┤╨╕╨╗ ╨▓ ╨║╨╛╨╜╤Д╨╗╨╕╨║╤В ╤Б ╨▓╨║╨╗╤О╤З╨╡╨╜╨╕╨╡╨╝ HighlightRotation ╤З╨╡╤А╨╡╨╖ StateChanged тАФ ╨▓╨╗╨░╨┤╨╡╨╗╤М╤Ж╨╡╨╝ overlay ╤Б╤В╨░╨╗ TutorialController).
+
+### Scope-╨│╤А╨░╨╜╨╕╤Ж╤Л ╤Б╨╛╨▒╨╗╤О╨┤╨╡╨╜╤Л
+╨Э╨Х ╤В╤А╨╛╨╜╤Г╤В╤Л: drag FSM, slot FSM, power chain/charging, snap/trigger routing, registry, layers, physics matrix; ╨╜╨╡ ╨╝╨╡╨╜╤П╨╗╨╕╤Б╤М `M_Pipe_Default/M_Slot_Empty/M_Slot_HoverValid/M_Slot_Wrong/M_Pipe_GreenFill`; `Factory.unity` ╨╜╨╡ ╨╕╨╖╨╝╨╡╨╜╤П╨╗╨░╤Б╤М; CTA/GameFlow/camera transition/PlayableScene ╨╜╨╡ ╨╜╨░╤З╨░╤В╤Л (╨н╤В╨░╨┐ 10/11 ╨╖╨░╨┐╤А╨╡╤Й╨╡╨╜╤Л).
+
+### ╨в╨╡╤Б╤В╤Л
+- `Assets/FactoryPipePower/Tests/PlayMode/Stage9TutorialOverlayPlayModeTests.cs` тАФ 25 ╤В╨╡╤Б╤В╨╛╨▓: shader (final shader name, ╨▓╤Б╨╡ 6 ╤Б╨▓╨╛╨╣╤Б╤В╨▓, supported/no-errors, transparent queue ╨┐╨╛╨╖╨╢╨╡ base materials, second material slot on/off), initialization (valid тЖТ HighlightPipe ╤В╨╛╨╗╤М╨║╨╛ ╨╜╨░ pipe, null pipe/slot тЖТ None ╨▒╨╡╨╖ exception, incompatible spec тЖТ None + 1 LogError, ╨┤╨▓╨╛╨╣╨╜╨╛╨╣ init тЖТ ╨▒╨╡╨╖ duplicate subscriptions/materials), flow (drag tutorial pipe тЖТ HighlightSlot, ╤З╤Г╨╢╨╛╨╣ drag ╨▒╨╡╨╖ ╨╕╨╖╨╝╨╡╨╜╨╡╨╜╨╕╨╣, return тЖТ HighlightPipe, wrong yaw тЖТ HighlightRotation, aligned тЖТ Complete, ╤З╤Г╨╢╨╛╨╣ slot accept/rotation ╨▒╨╡╨╖ ╨╕╨╖╨╝╨╡╨╜╨╡╨╜╨╕╨╣, rotate wrongтЖТaligned тЖТ Complete, Complete ╨▒╨╡╨╖ re-activation ╨╛╤В late events, Charging/Powered ╨▒╨╡╨╖ overlay), lifecycle (DisableTutorial ╨╕╨┤╨╡╨╝╨┐╨╛╤В╨╡╨╜╤В╨╡╨╜, enable/disable ╨▒╨╡╨╖ duplicate subscriptions, overlay ╨╜╨╡ ╨╝╨╡╨╜╤П╨╡╤В base material/fill/flow), hygiene (╨╛╨▒╤К╨╡╨║╤В╤Л ╤Г╨╜╨╕╤З╤В╨╛╨╢╨░╤О╤В╤Б╤П, overlay = shared asset ╨▒╨╡╨╖ leaks, ╨┐╨╛╤Б╨╗╨╡ destroy ╨╜╨╡╤В subscriptions). ╨в╨╡╤Е╨╜╨╕╨║╨░: ╤Д╨╡╨╣╨║╨╛╨▓╤Л╨╣ `FakePoweredNode : MonoBehaviour, IPowerNode` ╨┤╨╗╤П Charging-╤Б╤Ж╨╡╨╜╨░╤А╨╕╤П ╨▒╨╡╨╖ ╨┐╨╛╨╗╨╜╨╛╨╣ power-chain; reflection ╨╜╨░ event backing fields ╨┤╨╗╤П ╨┐╤А╨╛╨▓╨╡╤А╨║╨╕ duplicate/leak ╨┐╨╛╨┤╨┐╨╕╤Б╨╛╨║.
+
+---
+
+## 0. ╨н╤В╨░╨┐ 8 тАФ ╤З╤В╨╛ ╨┤╨╛╨▒╨░╨▓╨╗╨╡╨╜╨╛ (2026-10-10, ╨╖╨░╨▓╨╡╤А╤И╤С╨╜, ╨╢╨┤╤С╤В ╨┐╨╛╨┤╤В╨▓╨╡╤А╨╢╨┤╨╡╨╜╨╕╤П)
+
+### Production-╨║╨╛╨┤ (╨║╨╛╨╝╨┐╨╕╨╗╨╕╤А╤Г╨╡╤В╤Б╤П ╤З╨╕╤Б╤В╨╛)
+- **╨б╨╛╨╖╨┤╨░╨╜** `Assets/FactoryPipePower/Scripts/Power/IPowerNode.cs` тАФ ╨║╨╛╨╜╤В╤А╨░╨║╤В `IsPowered / PowerOutput / NotifyPreviousPowered(previous)` (╨▒╨╡╨╖ graph traversal API).
+- **╨б╨╛╨╖╨┤╨░╨╜** `Assets/FactoryPipePower/Scripts/Power/StartPowerNode.cs` тАФ `Initialize()` тЖТ powered, green fill=1, `nextNode.NotifyPreviousPowered(this)`; `SetNextNode`; `PowerOutput`; ╨▒╨╡╨╖ input/╨┐╨╛╨╕╤Б╨║╨░.
+- **╨б╨╛╨╖╨┤╨░╨╜** `Assets/FactoryPipePower/Scripts/Power/EndPowerNode.cs` тАФ ╤Б╤В╨░╤А╤В╤Г╨╡╤В `Inactive`; `NotifyPreviousPowered` ╨┐╤А╨╕╨╜╨╕╨╝╨░╨╡╤В ╤В╨╛╨╗╤М╨║╨╛ ╨╛╤В `expectedPrevious` (identity), ╨╛╨┤╨╜╨╛╨║╤А╨░╤В╨╜╤Л╨╣ ╤В╤А╨╕╨│╨│╨╡╤А (`activationCount`) тЖТ `Powered` + green + `factoryPowerController.SetOnline()`; ╨╕╨┤╨╡╨╝╨┐╨╛╤В╨╡╨╜╤В╨╡╨╜.
+- **╨б╨╛╨╖╨┤╨░╨╜** `Assets/FactoryPipePower/Scripts/Power/FactoryPowerController.cs` тАФ FSM `OfflineтЖТOnline`; `SetOnline` ╨╕╨┤╨╡╨╝╨┐╨╛╤В╨╡╨╜╤В╨╡╨╜ (event `FactoryOnline` ├Ч1); `Apply` ╨▓╨║╨╗╤О╤З╨░╨╡╤В renderers/indicators/particles/animators; ╨▒╨╡╨╖ targets тАФ ╨▒╨╡╨╖ exception.
+- **╨б╨╛╨╖╨┤╨░╨╜** `Assets/FactoryPipePower/Scripts/Power/PowerChainController.cs` тАФ `Initialize()`: ╨▓╨░╨╗╨╕╨┤╨░╤Ж╨╕╤П start + ordered init (factoryтЖТendтЖТslots reset+linkтЖТ`start.Initialize()`); `LinkChain` ╤Б╨▓╤П╨╖╤Л╨▓╨░╨╡╤В startтЖТslotsтЖТend; ╤Г╤Б╤В╨╛╨╣╤З╨╕╨▓ ╨║ 0 slots (startтЖТend); ╨╜╨╡ ╨╕╤Й╨╡╤В ╨╛╨▒╤К╨╡╨║╤В╤Л, ╨╜╨╡ ╨┤╨▓╨╕╨│╨░╨╡╤В transforms, ╨╜╨╡ ╤Б╤В╨░╨▓╨╕╤В slot state ╨╜╨░╨┐╤А╤П╨╝╤Г╤О, ╨╛╨▒╤Е╨╛╨┤╨╕╤В ╨║╨░╤Б╨║╨░╨┤ ╤В╨╛╨╗╤М╨║╨╛ ╤З╨╡╤А╨╡╨╖ node-╨║╨╛╨╜╤В╤А╨░╨║╤В.
+- **╨Ш╨╖╨╝╨╡╨╜╤С╨╜** `Assets/FactoryPipePower/Scripts/Pipes/PipeSlotController.cs` тАФ ╤А╨╡╨░╨╗╨╕╨╖╤Г╨╡╤В `IPowerNode`; ╨┐╨╛╨╗╤П `previousNodeBehaviour/nextNodeBehaviour/chargingDuration=0.25`; ╨┐╨╛╨╗╤П `previousNode/nextNode/hasCharged/chargeRoutine`; API `IsPowered, PreviousNode, NextNode, HasCharged, PowerOutput (farther connector ╨╛╤В previous), SetupPowerNodes, NotifyPreviousPowered, TryStartCharging, ChargeRoutine, ResetPowerState`; `EvaluateAlignment` ╨▓╤Л╨╖╤Л╨▓╨░╨╡╤В `TryStartCharging()` ╨┐╤А╨╕ aligned. ╨Ъ╨░╤Б╨║╨░╨┤ ╤З╨╡╤А╨╡╨╖ notify; guard'╤Л: ╤В╨╛╨╗╤М╨║╨╛ OccupiedAligned, previous powered, `!hasCharged`, ╨╜╨╡╤В ╨▓╤В╨╛╤А╨╛╨╣ coroutine; `TryRotateTap`/`TryAccept`/registry ╨▒╨╗╨╛╨║╨╕╤А╨╛╨▓╨░╨╜╤Л ╨▓ Charging/Powered (╤Б╤Г╤Й╨╡╤Б╤В╨▓╤Г╤О╤Й╨╕╨╡ guard'╤Л).
+- **╨Ш╨╖╨╝╨╡╨╜╤С╨╜** `Assets/FactoryPipePower/Scripts/Pipes/PipeVisualController.cs` тАФ `ReleaseGreenRuntimeMaterial()` ╤Б╨┤╨╡╨╗╨░╨╜ public (╨┤╨╗╤П reset ╨▒╨╡╨╖ ╤Г╤В╨╡╤З╨║╨╕).
+
+### Scope-╨│╤А╨░╨╜╨╕╤Ж╤Л ╤Б╨╛╨▒╨╗╤О╨┤╨╡╨╜╤Л
+╨Э╨Х ╤В╤А╨╛╨╜╤Г╤В╤Л: drag FSM, input flow, snap/trigger routing/registry/layers/physics matrix, tutorial flow, `Factory.unity`. Prefabs Start/End ╨╛╤В╨╗╨╛╨╢╨╡╨╜╤Л ╨╜╨░ ╨н╤В╨░╨┐ 11 (╤Б╨▒╨╛╤А╨║╨░ PlayableScene); ╨┤╨╗╤П ╤В╨╡╤Б╤В╨╛╨▓ ╨╛╨▒╤К╨╡╨║╤В╤Л ╤Б╤В╤А╨╛╤П╤В╤Б╤П ╨┐╤А╨╛╨│╤А╨░╨╝╨╝╨╜╨╛. ╨н╤В╨░╨┐ 9/10 ╨╜╨╡ ╨╜╨░╤З╨░╤В╤Л.
+
+### ╨в╨╡╤Б╤В╤Л
+- `Assets/FactoryPipePower/Tests/PlayMode/Stage8PowerChainPlayModeTests.cs` тАФ 26 ╤В╨╡╤Б╤В╨╛╨▓ (╨▓╤Б╨╡ ╨╛╨▒╤П╨╖╨░╤В╨╡╨╗╤М╨╜╤Л╨╡ ╤Б╤Ж╨╡╨╜╨░╤А╨╕╨╕): node setup (start powered fill1, end inactive, wrong/correct previous, factory offline/online/idempotent), slot power rules (empty/wrong/aligned+unpowered/aligned+powered, powered fill1, no rotate, no double coroutine, endpoints via ConnectorA/B, notify-after-powered), cascade (3-slot sequential, next-not-before-previous, empty blocks, late alignment, pre-aligned tail, end-after-last, factory-after-end), idempotency/reset (repeat notify, reset no-leak, empty targets, zero-slot chain).
+
+---
+
+## 1. ╨Ш╤В╨╛╨│ ╨┐╤А╨╛╨│╨╛╨╜╨░ ╤В╨╡╤Б╤В╨╛╨▓ (2026-10-12, ╨н╤В╨░╨┐ 9)
+
+| Assembly | Mode | Total | Passed | Failed |
+|---|---|---|---|---|
+| `FactoryPipePower.PlayModeTests` (╨║╨╗╨░╤Б╤Б `Stage9TutorialOverlayPlayModeTests`) | PlayMode | 25 | 25 | 0 |
+| `FactoryPipePower.Tests` | EditMode | 61 | 61 | 0 |
+
+- PlayMode ╨╜╨░╨║╨╛╨┐╨╕╤В╨╡╨╗╤М╨╜╨╛ = 11 Stage-3 + 20 Stage-4 + 14 Stage-5 + 16 Stage-6 + 12 Stage-7 + 26 Stage-8 + 25 Stage-9 (`Stage9TutorialOverlayPlayModeTests`).
+- **Harness caveat:** PlayMode ╤З╨╡╤А╨╡╨╖ ╤Н╤В╨╛╤В MCP ╨╜╨░╨┤╤С╨╢╨╜╨╛ ╨╖╨░╨┐╤Г╤Б╨║╨░╤В╤М ╨┐╨╛ ╨║╨╛╨╜╨║╤А╨╡╤В╨╜╨╛╨╝╤Г test class (`testNamespace=FactoryPipePower.PlayModeTests.<ClassName>`) ╨╕╨╗╨╕ `testAssembly=FactoryPipePower.PlayModeTests`. Unfiltered/╨┐╨╛-namespace PlayMode-╤А╨░╨╜ ╨▓ ╤В╨╡╨║╤Г╤Й╨╡╨╝ ╨╛╨║╤А╤Г╨╢╨╡╨╜╨╕╨╕ ╨▓╨╛╨╖╨▓╤А╨░╤Й╨░╨╗ `0 tests` (╨╝╨│╨╜╨╛╨▓╨╡╨╜╨╜╨╛, DurationтЙИ0.003s) тАФ ╨┤╨╡╤Д╨╡╨║╤В test discovery/filtering harness, ╨Э╨Х regression ╨┐╤А╨╛╨╡╨║╤В╨░ ╨╕ ╨Э╨Х failing tests. `0 tests` ╨╜╨╡ ╤Б╤З╨╕╤В╨░╤В╤М ╨┐╤А╨╛╨▓╨░╨╗╨╛╨╝. asmdef/Test Runner settings ╨╜╨╡ ╨╝╨╡╨╜╤П╤В╤М.
+- Console: **project compile errors = 0**, **shader errors = 0**, test failures = 0. ╨Х╨┤╨╕╨╜╤Б╤В╨▓╨╡╨╜╨╜╨░╤П ╨╛╤И╨╕╨▒╨║╨░ тАФ ╨╛╨╢╨╕╨┤╨░╨╡╨╝╨░╤П LogAssert (`Initialize_IncompatibleSpec_None_OneError_OverlaysOff`).
+- ╨У╨╕╨│╨╕╨╡╨╜╨░ (╤А╤Г╤З╨╜╨░╤П): `Factory.unity` ╨╜╨╡ ╨╛╤В╨║╤А╤Л╤В╨░ ╨╕ ╨╜╨╡ ╨╕╨╖╨╝╨╡╨╜╤П╨╗╨░╤Б╤М (mtime Feb 3); ╨╛╤В╨║╤А╤Л╤В╨░╤П `FactoryPipePower_Test` (╤Е╨░╤А╨╜╨╡╤Б) IsDirty=false; runtimeMaterialLeaks=0; TutorialOverlay/GreenFill hasErrors=False; ╨▓╤А╨╡╨╝╨╡╨╜╨╜╤Л╤Е S9-╨╛╨▒╤К╨╡╨║╤В╨╛╨▓ ╨╜╨╡╤В.
+
+---
+
+> **Provenance:** This is a new, explicitly authored Stage 10 checkpoint
+> addendum. It was not part of the forensically recovered 283-line Stage 9
+> snapshot restored on 2026-10-13. Stage 10 implementation and its target
+> test evidence were produced on 2026-10-12.
+
+## Stage 10 — Win Flow
+
+Status: IMPLEMENTED, TECHNICALLY VERIFIED, AWAITING USER CONFIRMATION.
+
+### Added
+- `Scripts/GameFlow/GameFlowController.cs`
+- `Scripts/GameFlow/CompletionUI.cs`
+- `Tests/PlayMode/Stage10GameFlowPlayModeTests.cs`
+- additive input gate in `PointerInputController.cs`
+
+### Flow
+- `Gameplay -> WinPending -> Completed`
+- единственный win trigger: `FactoryPowerController.FactoryOnline`
+- WinPending один раз блокирует новый input через `SetInputBlocked(true)`
+- tutorial disable после победы
+- completion delay и CTA completion UI
+- повторный FactoryOnline не создаёт duplicate completion/UI/events
+
+### Test evidence
+- Target PlayMode run: `Stage10GameFlowPlayModeTests` — 11/11 Passed.
+- EditMode suite: 61/61 Passed (run twice after the Stage 10 changes).
+- Project compile errors: 0.
+- PlayMode regression caveat: after the successful target Stage 10 run, the
+  MCP harness intermittently returned `0 tests` for other PlayMode filters and
+  assembly-wide invocation. These were discovery results, not passing
+  regression results, and do not replace a complete PlayMode regression run.
+- The Stage 10 acceptance decision remains pending explicit user confirmation.
+
+### Boundaries
+- `Factory.unity` was not opened or changed.
+- No Stage 11 work was started.
+- Stage 10 acceptance remains pending explicit user approval.
+- The restored Stage 9 snapshot and this Stage 10 addendum have distinct
+  provenance; this addendum is not a forensic reconstruction.
+- No Stage 11 work is authorized until explicit user confirmation of Stage 10.
+## 0. ╨н╤В╨░╨┐ 4 тАФ ╤З╤В╨╛ ╨┤╨╛╨▒╨░╨▓╨╗╨╡╨╜╨╛ (2026-10-10, ╨▓╨░╤А╨╕╨░╨╜╤В B+C, ╨┐╨╛╨┤╤В╨▓╨╡╤А╨╢╨┤╤С╨╜ ╨┐╨╛╨╗╤М╨╖╨╛╨▓╨░╤В╨╡╨╗╨╡╨╝)
+
+### Production-╨║╨╛╨┤ (╨║╨╛╨╝╨┐╨╕╨╗╨╕╤А╤Г╨╡╤В╤Б╤П ╤З╨╕╤Б╤В╨╛)
+- `Assets/FactoryPipePower/Scripts/Pipes/PipeSlotController.cs` тАФ FSM
+  `Empty/HoverValid/OccupiedWrongRotation/OccupiedAligned` (+ Charging/Powered enum-╨╖╨░╨│╨╛╤В╨╛╨▓╨║╨╕ ╨▒╨╡╨╖ ╨╗╨╛╨│╨╕╨║╨╕).
+  API: `ExpectedSpec, State, IsOccupied, IsAligned, AnchorY, ConnectorA, ConnectorB, SlotRotationGroup,
+  AcceptedPipe, PlacementCommitted, IsRotating, IsCompatible(pipe), TryAccept(pipe), TryRotateTap(),
+  SetHoverValid(bool), ResetSlot()`. `TryAccept` = production API (guard'╤Л: null / committed / state / not-Dragging /
+  spec mismatch ╤З╨╡╤А╨╡╨╖ `PipeSpec.Equals`); ╨┐╤А╨╕╨╜╨╕╨╝╨░╨╡╤В: `CommitPlaced()` тЖТ set anchor quarter yaw ╨┐╨╛ `pipe.WorldYaw`
+  ╤З╨╡╤А╨╡╨╖ `QuarterTurnUtility` тЖТ `EvaluateAlignment()`. `TryRotateTap` ╤В╨╛╨╗╤М╨║╨╛ ╨╕╨╖ `OccupiedWrongRotation`,
+  +90┬░ ╤З╨╡╤А╨╡╨╖ ╨║╨╛╤А╤Г╤В╨╕╨╜╤Г SmoothStep/Slerp (`rotationDuration=0.2`), ╤Д╨╕╨╜╨░╨╗ тАФ ╤В╨╛╤З╨╜╤Л╨╣ quarter-quaternion.
+  ╨Ь╨░╤В╨╡╤А╨╕╨░╨╗╤Л ╤Б╨╗╨╛╤В-╨▓╨╕╨╖╤Г╨░╨╗╨░ ╤В╨╛╨╗╤М╨║╨╛ ╤З╨╡╤А╨╡╨╖ `PipeVisualController.SetBaseMaterial`:
+  EmptyтЖТ`M_Slot_Empty`, HoverValidтЖТ`M_Slot_HoverValid`, WrongтЖТ`M_Slot_Wrong`, AlignedтЖТ`M_Pipe_Default`;
+  overlay ╤Б╨╜╨╕╨╝╨░╨╡╤В╤Б╤П ╨┐╤А╨╕ `TryAccept`.
+- `Assets/FactoryPipePower/Scripts/Pipes/PipeSlotRegistry.cs` тАФ ╨┐╨░╤Б╤Б╨╕╨▓╨╜╤Л╨╣ (`Register` ╤Б duplicate-guard,
+  `Unregister` ╤Б null-guard, `Slots`, `Count`), ╨▒╨╡╨╖ ╤Б╨▓╤П╨╖╨╕ ╤Б input.
+- `Assets/FactoryPipePower/Scripts/Input/PointerInputController.cs` тАФ ╨┤╨╛╨▒╨░╨▓╨╗╨╡╨╜ `slotTapMask`,
+  ╨┐╨╛╤А╤П╨┤╨╛╨║ ╨▓ `OnPressStarted`: activePipe тЖТ return; raycast pickMask тЖТ Stock pipe тЖТ BeginDrag, return;
+  raycast slotTapMask тЖТ `PipeSlotController.TryRotateTap()`.
+
+### Prefab-╤Л
+- `Assets/FactoryPipePower/Prefabs/PF_PipeSlot_Small_M2.prefab` (Small/M2), `PF_PipeSlot_Large_M3.prefab` (Large/M3).
+- ╨Ш╨╡╤А╨░╤А╤Е╨╕╤П: root `[Transform, PipeSlotController]` тЖТ `AnchorY` тЖТ `SlotPipeVisual` (render mesh, ╨╜╨╡ ConvexHulls);
+  ╨┤╨╡╤В╨╕ root: `ConnectorA`, `ConnectorB`, `CaptureVolume` (BoxCollider, ╨╜╨╡ trigger, +4%), `TapCollider`
+  (BoxCollider ╨┐╨╛ bounds mesh, ╨╜╨╡ trigger). Material `M_Slot_Empty`; rotationGroup=`Yaw0Or180`;
+  rotationDuration=0.2; ╨▓╤Б╨╡ ref-╤Л ╨╜╨░╨╖╨╜╨░╤З╨╡╨╜╤Л; layer=0; Rigidbody ╨╛╤В╤Б╤Г╤В╤Б╤В╨▓╤Г╨╡╤В (╨┐╨╛ scope ╨н╤В╨░╨┐╨░ 4).
+- ╨Я╤А╨╕╨╝╨╡╤З╨░╨╜╨╕╨╡: `expectedSpec` ╨╖╨░╨┐╨╕╤Б╤Л╨▓╨░╨╗╤Б╤П ╤З╨╡╤А╨╡╨╖ `SerializedObject` ╤Б ╤В╨╛╤З╨╡╤З╨╜╤Л╨╝ ╨┐╤Г╤В╤С╨╝ `expectedSpec.diameter`
+  (╨Э╨Х ╤Б╨╗╤Н╤И); enum-╨╕╨╜╨┤╨╡╨║╤Б╤Л: M2 тЖТ index 1, M3 тЖТ index 2 (`(int)PipeLength.Mx - 1`).
+
+### ╨в╨╡╤Б╤В╤Л (20 PlayMode + EditMode baseline)
+- `Assets/FactoryPipePower/Tests/PlayMode/PipeSlotControllerPlayModeTests.cs` тАФ 20 ╤В╨╡╤Б╤В╨╛╨▓, ╨┐╨╛╨║╤А╤Л╨▓╨░╤О╤В:
+  prefab-╤Б╤В╤А╤Г╨║╤В╤Г╤А╤Г (├Ч2), ╤Б╤В╨░╤А╤В Empty, TryAccept aligned/wrong/guard'╤Л, HoverValid, +90┬░ ╨┐╨╛╨▓╨╛╤А╨╛╤В
+  (╨░╨╜╨╕╨╝╨░╤Ж╨╕╤П + ╤В╨╛╤З╨╜╤Л╨╣ quarter-╤Д╨╕╨╜╨░╨╗), ╨╛╨▒╨╡ rotation groups, ╨┐╨╛╨▓╤В╨╛╤А╨╜╤Л╨╣ tap ╨┐╤А╨╕ ╨▓╤А╨░╤Й╨╡╨╜╨╕╨╕, ╤В╨╛╨╗╤М╨║╨╛ AnchorY
+  ╨║╤А╤Г╤В╨╕╤В╤Б╤П, ResetSlot, non-standard start yaw тЖТ ╤В╨╛╤З╨╜╤Л╨╣ quarter, input: tap ╨┐╨╛ TapCollider, ╨┐╤А╨╕╨╛╤А╨╕╤В╨╡╤В
+  activePipe ╨╜╨░╨┤ ╤Б╨╗╨╛╤В-tap, press ╨┐╨╛╨▓╨╡╤А╤Е ╤Б╨╗╨╛╤В╨░ тЖТ pipe, release-after-commit.
+
+### ╨Ш╨╖╨▓╨╡╤Б╤В╨╜╤Л╨╡ ╨╛╤Б╨╛╨▒╨╡╨╜╨╜╨╛╤Б╤В╨╕/╨╜╨░╨▒╨╗╤О╨┤╨╡╨╜╨╕╤П
+1. ╨Я╤А╨╕ ╨│╤А╤Г╨┐╨┐╨░╤Е `{0,180}`/`{90,270}` ╨╛╨┤╨╕╨╜ ╤И╨░╨│ +90 ╨Т╨б╨Х╨У╨Ф╨Р ╨╝╨╡╨╜╤П╨╡╤В alignedness тЖТ ╨║╨╡╨╣╤Б ┬лstays Wrong ╨┐╨╛╤Б╨╗╨╡ +90┬╗
+   ╨╜╨╡╨┤╨╛╤Б╤В╨╕╨╢╨╕╨╝ ╨╝╨░╤В╨╡╨╝╨░╤В╨╕╤З╨╡╤Б╨║╨╕; ╤В╨╡╤Б╤В `TryRotateTap_GroupYaw90Or270_WrongYaw0_BecomesAligned` ╤Д╨╕╨║╤Б╨╕╤А╤Г╨╡╤В ╤Н╤В╨╛.
+2. `TryRotateTap` ╨▓ `OccupiedAligned` ╨▓╨╛╨╖╨▓╤А╨░╤Й╨░╨╡╤В false (╨┐╨╛ design-╤А╨╡╤И╨╡╨╜╨╕╤О ╨┐╨╛╨╗╤М╨╖╨╛╨▓╨░╤В╨╡╨╗╤П ╨╜╨░ ╨н╤В╨░╨┐╨╡ 4;
+   techdoc ┬з11 ╨┤╨╛╨┐╤Г╤Б╨║╨░╨╡╤В ╨┐╨╛╨▓╨╛╤А╨╛╤В ╨╕ ╨╕╨╖ Aligned тАФ ╨▓╨╛╨┐╤А╨╛╤Б ╨╜╨░ ╨н╤В╨░╨┐ 5+).
+3. ╨б╤Ж╨╡╨╜╨░ Factory.unity ╨▒╤Л╨╗╨░ dirty ╨┐╨╛╤Б╨╗╨╡ ╨╕╨╜╤Б╤В╤А╤Г╨╝╨╡╨╜╤В╨╛╨▓ ╤Б╨╛╨╖╨┤╨░╨╜╨╕╤П ╨┐╤А╨╡╤Д╨░╨▒╨╛╨▓; ╨┐╨╛ ╤А╨╡╤И╨╡╨╜╨╕╤О ╨┐╨╛╨╗╤М╨╖╨╛╨▓╨░╤В╨╡╨╗╤П
+   ╨┐╨╡╤А╨╡╨╖╨░╨│╤А╤Г╨╢╨╡╨╜╨░ ╤Б ╨┤╨╕╤Б╨║╨░ (IsDirty=false, rootCount=2265).
+
+---
+
+## 2. ╨з╤В╨╛ ╤Б╨┤╨╡╨╗╨░╨╜╨╛ ╨▓ ╨н╤В╨░╨┐╨╡ 3 (╨┐╨╛╨╗╨╜╤Л╨╣ ╨┐╨╡╤А╨╡╤З╨╡╨╜╤М)
+
+### Production-╨║╨╛╨┤ (╨║╨╛╨╝╨┐╨╕╨╗╨╕╤А╤Г╨╡╤В╤Б╤П ╤З╨╕╤Б╤В╨╛)
+- `Assets/FactoryPipePower/Scripts/Core/PipeTypes.cs`
+- `Assets/FactoryPipePower/Scripts/Core/QuarterTurnUtility.cs`
+- `Assets/FactoryPipePower/Scripts/Pipes/PipeVisualController.cs`
+- `Assets/FactoryPipePower/Scripts/Pipes/DraggablePipeController.cs`
+- `Assets/FactoryPipePower/Scripts/Input/PointerInputController.cs`
+- `Assets/FactoryPipePower/FactoryPipePower.asmdef` тАФ `"references": ["Unity.InputSystem"]`
+- `Assets/FactoryPipePower/Input/FactoryPipePower.inputactions` тАФ guid `07a41aca42864384aa3699a54731860d`,
+  map `Gameplay`, ╤А╨╛╨▓╨╜╨╛ 2 actions: `PointerPosition` (Value/Vector2, `<Pointer>/position`),
+  `PointerPress` (Button, `<Pointer>/press`)
+
+### Prefab-╤Л
+- `Assets/FactoryPipePower/Prefabs/PF_DraggablePipe_Small_M2.prefab`
+  (Small/M2, mesh `SM_Factory_Small_pipe_2m`, bounds 0.443├Ч0.443├Ч2, center z=1)
+- `Assets/FactoryPipePower/Prefabs/PF_DraggablePipe_Large_M3.prefab`
+  (Large/M3, mesh `SM_Factory_Large_pipe_3m`, bounds 0.8├Ч0.8├Ч3, center z=1.5)
+- ╨б╤В╤А╤Г╨║╤В╤Г╤А╨░: root `[Transform, Rigidbody, DraggablePipeController]`, ╨┤╨╡╤В╨╕ ╤А╨╛╨▓╨╜╨╛ `Visual`
+  `[MeshFilter, MeshRenderer, PipeVisualController]` ╨╕ `DragCollider` `[BoxCollider]`.
+- Rigidbody: isKinematic, useGravity=false, Interpolate, Discrete.
+- ╨Э╨░╤Б╤В╤А╨╛╨╣╨║╨╕: `returnDuration=0.25`, `dragPlaneHeight=1.0`; collider ╨┐╨╛ bounds mesh (╨╛╤Б╤М Z, ╨╜╨╡ trigger);
+  ╨╝╨░╤В╨╡╤А╨╕╨░╨╗ `M_Pipe_Default`; ╨▓╤Б╨╡ ref-╤Л (visual/dragCollider/body/defaultMaterial) ╨╜╨░╨╖╨╜╨░╤З╨╡╨╜╤Л; layer=0.
+- **╨Т╨Р╨Ц╨Э╨Ю:** FBX ╤Б╨╛╨┤╨╡╤А╨╢╨╕╤В ╤Б╨░╨▒╨░╤Б╤Б╨╡╤В `*_ConvexHulls` тАФ mesh ╨▒╤А╨░╤В╤М ╤В╨╛╨╗╤М╨║╨╛ ╨╕╨╖ `MeshFilter.sharedMesh`.
+
+### ╨в╨╡╤Б╤В╤Л
+- PlayMode asmdef `Assets/FactoryPipePower/Tests/PlayMode/FactoryPipePower.PlayModeTests.asmdef`:
+  refs = TestRunners, FactoryPipePower, Unity.InputSystem; `includePlatforms: []`;
+  `overrideReferences` + `nunit.framework.dll`; `defineConstraints: ["UNITY_INCLUDE_TESTS"]`.
+- `Assets/FactoryPipePower/Tests/PlayMode/DraggablePipeControllerPlayModeTests.cs` тАФ 11 ╤В╨╡╤Б╤В╨╛╨▓ (╤Б╨╝. ┬з4).
+- EditMode baseline: `Tests/Editor/QuarterTurnUtilityTests.cs`, `Tests/Editor/PipeSpecTests.cs` тАФ 61 ╤В╨╡╤Б╤В.
+
+---
+
+## 3. ╨Ъ╨░╨║ ╨▒╤Л╨╗ ╨╕╤Б╨┐╤А╨░╨▓╨╗╨╡╨╜ ╨┐╨╛╤Б╨╗╨╡╨┤╨╜╨╕╨╣ ╤Д╨╡╨╣╨╗ (╨▓╨░╨╢╨╜╨╛ ╨┤╨╗╤П ╨▒╤Г╨┤╤Г╤Й╨╡╨│╨╛)
+
+**FAILED (╨▒╤Л╨╗):** `PointerRelease_EndsDrag_WithoutPlacement_ReturnsToStock`
+`pipe must return to the exact stockPosition тАФ Expected < 1e-4, But was: 0.000357123296`
+
+**╨Ф╨╕╨░╨│╨╜╨╛╨╖:** ╨Э╨Х ╨▒╨░╨│ production-╨║╨╛╨┤╨░. Transient ╨╕╨╜╤В╨╡╤А╨┐╨╛╨╗╤П╤Ж╨╕╨╕ Rigidbody
+(`RigidbodyInterpolation.Interpolate`): ╨┐╤А╨╕ ╤Д╨╗╨╕╨┐╨╡ ╨▓ `Stock` `Rigidbody.position` ╨▓╤Л╤Б╤В╨░╨▓╨╗╤П╨╡╤В╤Б╤П
+╤В╨╛╤З╨╜╨╛, ╨░ `transform` ╤З╨╕╤В╨░╨╡╤В╤Б╤П ╨┤╨╛ ╤В╨╛╨│╨╛, ╨║╨░╨║ ╨╕╨╜╤В╨╡╤А╨┐╨╛╨╗╤П╤Ж╨╕╤П settle-╨╕╤В╤Б╤П ╨┐╨╛╤Б╨╗╨╡ drag ╨╜╨░ 1.5 ╨╝.
+
+**╨а╨╡╤И╨╡╨╜╨╕╨╡ (tolerance ╨Э╨Х ╨╛╤Б╨╗╨░╨▒╨╗╤П╨╗╤Б╤П):** ╨┤╨▓╤Г╤Е╤Д╨░╨╖╨╜╤Л╨╣ assert-╨┐╨░╤В╤В╨╡╤А╨╜ ╨▓ ╨╛╨▒╨╛╨╕╤Е release-╤В╨╡╤Б╤В╨░╤Е
+(`Release_WithoutPlacement_ReturnsToExactStockPose` ~╤Б╤В╤А.218, `PointerRelease_...` ~╤Б╤В╤А.356):
+
+```csharp
+yield return WaitUntilState(pipe, DraggablePipeState.Stock, 5f);
+
+var rb = go.GetComponent<Rigidbody>();
+Assert.Less((rb.position - stockPos).magnitude, 1e-4f, "...exact stockPosition when state flips...");
+Assert.Less(Quaternion.Angle(stockRot, rb.rotation), 0.01f, "...exact stockRotation when state flips...");
+
+yield return new WaitForFixedUpdate();
+yield return new WaitForFixedUpdate();
+yield return null;
+
+Assert.Less((go.transform.position - stockPos).magnitude, 1e-4f, "settled exact position");
+Assert.Less(Quaternion.Angle(stockRot, go.transform.rotation), 0.01f, "settled exact rotation");
+Assert.IsTrue(col.enabled, ...);
+```
+
+╨Х╤Б╨╗╨╕ ╨┐╨╛╨┤╨╛╨▒╨╜╤Л╨╣ ╤Д╨╡╨╣╨╗ ╨┐╨╛╤П╨▓╨╕╤В╤Б╤П ╤Б╨╜╨╛╨▓╨░ тАФ ╤Б╨╜╨░╤З╨░╨╗╨░ ╨┐╤А╨╛╨▓╨╡╤А╨╕╤В╤М ╨│╨╕╨┐╨╛╤В╨╡╨╖╤Г ╨╕╨╜╤В╨╡╤А╨┐╨╛╨╗╤П╤Ж╨╕╨╕/settle,
+╨Э╨Х ╨╛╤Б╨╗╨░╨▒╨╗╤П╤В╤М tolerance ╨▒╨╡╨╖ ╤П╨▓╨╜╨╛╨│╨╛ ╤А╨░╨╖╨▒╨╛╤А╨░.
+
+---
+
+## 4. ╨з╨╡╨║-╨╗╨╕╤Б╤В╤Л A/B/C тАФ ╤З╤В╨╛ ╨┐╨╛╨║╤А╤Л╤В╨╛ ╤В╨╡╤Б╤В╨░╨╝╨╕
+
+### A тАФ FSM (`DraggablePipeState {Stock,Dragging,Returning,Placed}`)
+| ╨Я╤Г╨╜╨║╤В | ╨в╨╡╤Б╤В |
+|---|---|
+| Initial Stock, collider on, interactable | `NewPipe_StartsInStock_ColliderEnabled` |
+| Stock тЖТ Dragging ╨▒╨╡╨╖ ╤Б╨┤╨▓╨╕╨│╨░ ╨┐╨╛╨╖╤Л/╨┐╨╛╨▓╨╛╤А╨╛╤В╨░, ╨▒╨╡╨╖ ╨┤╤А╨╡╨╣╤Д╨░ ╨▒╨╡╨╖ ╨▓╨▓╨╛╨┤╨░ | `BeginDrag_TransitionsToDragging_WithoutChangingPose` |
+| Drag ╨┐╨╛ ╨│╨╛╤А╨╕╨╖╨╛╨╜╤В╨░╨╗╤М╨╜╨╛╨╣ ╨┐╨╗╨╛╤Б╨║╨╛╤Б╤В╨╕ `dragPlaneHeight=1.0`, yaw ╨╜╨╡ ╨╝╨╡╨╜╤П╨╡╤В╤Б╤П | `UpdateDrag_FollowsHorizontalPlane_AndKeepsYaw` |
+| Dragging тЖТ Returning тЖТ ╤В╨╛╤З╨╜╤Л╨╣ Stock (API-╨┐╤Г╤В╤М) | `Release_WithoutPlacement_ReturnsToExactStockPose` |
+| Release ╨▒╨╡╨╖ slot тЖТ Returning тЖТ ╤В╨╛╤З╨╜╤Л╨╣ Stock (input-╨┐╤Г╤В╤М) = T02 | `PointerRelease_EndsDrag_WithoutPlacement_ReturnsToStock` |
+| `CommitPlaced()`: Placed, visual off, collider off, root active, `Committed` ├Ч1, ╨▒╨╡╨╖ re-entry | `CommitPlaced_HidesVisualOnly_StatePlaced_ColliderOff_NoReentry` |
+| Placed ╨╜╨╡ ╨▓╤Л╤Е╨╛╨┤╨╕╤В ╨╕╨╖ Placed ╨┐╨╛ release/BeginDrag | `ReleaseAfterCommit_KeepsPlaced_AndPipeNotSelectable` |
+
+### B тАФ Input
+| ╨Я╤Г╨╜╨║╤В | ╨в╨╡╤Б╤В |
+|---|---|
+| Gameplay map, 2 actions, `<Pointer>/position` + `<Pointer>/press` | `InputActions_HaveGameplayMapAndUnifiedPointerBindings` |
+| Press ╨▓╤Л╨▒╨╕╤А╨░╨╡╤В ╤В╨╛╨╗╤М╨║╨╛ Stock-pipe, ╨╛╨┤╨╕╨╜ `ActivePipe`, Placed ╨╜╨╡ ╨▓╤Л╨▒╨╕╤А╨░╨╡╤В╤Б╤П | `PointerPress_SelectsOnlyStockPipe_AndKeepsSingleActive` |
+| Release тЖТ Returning ╨╕ `ActivePipe = null` | `PointerRelease_EndsDrag_WithoutPlacement_ReturnsToStock` |
+| Placed ╨╜╨╕╨║╨╛╨│╨┤╨░ ╨╜╨╡ select-╨╕╤В╤Б╤П | `ReleaseAfterCommit_KeepsPlaced_AndPipeNotSelectable` |
+
+### C тАФ Prefab
+| ╨Я╤Г╨╜╨║╤В | ╨в╨╡╤Б╤В |
+|---|---|
+| ╨Ф╨╡╤В╨╕ ╤А╨╛╨▓╨╜╨╛ `Visual`+`DragCollider`, mesh ╨╕╨╖ `sharedMesh`, 1 submesh, `M_Pipe_Default`, PipeVisualController | `Prefab_Structure_Rigidbody_And_Collider` (Small/M2) |
+| BoxCollider ╨┐╨╛ bounds mesh, ╨╛╤Б╤М Z, ╨╜╨╡ trigger, ╨▓╨║╨╗╤О╤З╤С╨╜ | ╤В╨╛ ╨╢╨╡ |
+| Rigidbody kinematic / no gravity / Interpolate / Discrete | ╤В╨╛ ╨╢╨╡ |
+| `returnDuration=0.25`, `dragPlaneHeight=1.0`, ╨▓╤Б╨╡ ref-╤Л ╨╜╨░╨╖╨╜╨░╤З╨╡╨╜╤Л | ╤В╨╛ ╨╢╨╡ |
+| Layer = 0 ╨╜╨░ ╨▓╤Б╨╡╤Е ╨┤╨╡╤В╤П╤Е | ╤В╨╛ ╨╢╨╡ |
+| Large/M3 ╨▓╨░╤А╨╕╨░╨╜╤В | ╨▓╤В╨╛╤А╨╛╨╣ `[TestCase]` |
+
+---
+
+## 5. ╨У╨╕╨│╨╕╨╡╨╜╨░ ╨╛╨║╤А╤Г╨╢╨╡╨╜╨╕╤П (╨┐╤А╨╛╨▓╨╡╤А╨╡╨╜╨░ 2026-10-09)
+
+- `Factory.unity` IsDirty = false, rootCount = 2265, Play Mode ╨▓╤Л╨║╨╗╤О╤З╨╡╨╜.
+- ╨Т╤А╨╡╨╝╨╡╨╜╨╜╤Л╤Е GameObject (Harness/MCP/Probe) ╨▓ ╤Б╤Ж╨╡╨╜╨╡ тАФ ╨╜╨╡╤В.
+- `Application.runInBackground = False` (restore ╨┤╨╡╨╗╨░╨╡╤В `TearDown` ╨╕╨╖ saved `previousRunInBackground`).
+- ╨Т `Assets/**` ╨╜╨╡╤В ╨╜╨╕ ╨╛╨┤╨╜╨╛╨│╨╛ `EditorApplication.update` / `EditorApplication.Step` (╨┐╤А╨╛╨▓╨╡╤А╨╡╨╜╨╛ rg).
+- `EditorApplication.update = SUBSCRIBED` тАФ ╤Н╤В╨╛ ╤Б╨░╨╝ MCP-╨┐╨░╨║╨╡╤В (dispatch), ╨╜╨╡ ╨╜╨░╤И harness.
+
+---
+
+## 6. ╨б╤В╤А╨╛╨│╨╕╨╡ ╨┐╤А╨░╨▓╨╕╨╗╨░ ╨┐╨╛╨╗╤М╨╖╨╛╨▓╨░╤В╨╡╨╗╤П (╨╜╨░╤А╤Г╤И╨░╤В╤М ╨╜╨╡╨╗╤М╨╖╤П)
+
+1. ╨Э╨Х `Physics.autoSyncTransforms` ╨╜╨╕╨│╨┤╨╡. ╨Ю╨┤╨╕╨╜ `Physics.SyncTransforms()` ╨╜╨░ ╤И╨░╨│ ╤В╨╡╤Б╤В╨░ ╨┐╨╛╤Б╨╗╨╡
+   Instantiate/╤Б╨╝╨╡╨╜╤Л ╨┐╨╛╨╖╨╕╤Ж╨╕╨╕ тАФ ╨Э╨Ш╨Ъ╨Ю╨У╨Ф╨Р ╨▓ Update/FixedUpdate/runtime drag loop.
+2. ╨Э╨╕╨║╨░╨║╨╛╨│╨╛ `EditorApplication.Step()` / `EditorApplication.update` / UnityEditor API / ╤В╨╡╤Б╤В╨╛╨▓
+   ╨▓ runtime assembly `Assets/FactoryPipePower/Scripts/`. Frame pump тАФ ╤В╨╛╨╗╤М╨║╨╛ ╨▓╨╛ ╨▓╤А╨╡╨╝╨╡╨╜╨╜╨╛╨╝
+   editor harness / ╤В╨╡╤Б╤В╨░╤Е.
+3. ╨Э╨╡╤В top-level `static`-╨╛╨▒╤К╤П╨▓╨╗╨╡╨╜╨╕╨╣ ╨▓ code ╨┤╨╗╤П MCP Script/Execute; helper'╤Л тАФ ╨┐╨╛╨╗╨╜╤Л╨╣ ╨║╨╗╨░╤Б╤Б;
+   ╨║╨╗╨░╤Б╤Б ╨▓ script-execute ╨╛╨▒╤П╨╖╨░╨╜ ╨╜╨░╨╖╤Л╨▓╨░╤В╤М╤Б╤П `Script` (╨╕╨╜╨░╤З╨╡ ╨╛╤И╨╕╨▒╨║╨░ harness'╨░).
+4. ╨Ю╤И╨╕╨▒╨║╨╕ MCP тЙа ╨╛╤И╨╕╨▒╨║╨╕ ╨┐╤А╨╛╨╡╨║╤В╨░. ╨Т ╨╛╤В╤З╤С╤В╨╡ ╨▓╤Б╨╡╨│╨┤╨░ ╤А╨░╨╖╨┤╨╡╨╗╤П╤В╤М:
+   `project compile errors` / `test errors` / `MCP tool-harness errors`.
+5. ╨Э╨╡ ╨╝╨╡╨╜╤П╤В╤М `PipeVisualController`, FSM, ╤Ж╨▓╨╡╤В╨╛╨▓╤Г╤О ╤Б╨╡╨╝╨░╨╜╤В╨╕╨║╤Г ╤Б╨╛╤Б╤В╨╛╤П╨╜╨╕╨╣.
+   (╨г╤В╨╛╤З╨╜╨╡╨╜╨╕╨╡ 2026-10-10: ╨╛╨│╤А╨░╨╜╨╕╤З╨╡╨╜╨╕╨╡ ╨╜╨░ `PipeVisualController` ╤Б╨╜╤П╤В╨╛ ╤П╨▓╨╜╤Л╨╝ ╤А╨░╨╖╤А╨╡╤И╨╡╨╜╨╕╨╡╨╝ ╨┐╨╛╨╗╤М╨╖╨╛╨▓╨░╤В╨╡╨╗╤П
+   ╨▓ scope ╨н╤В╨░╨┐╨░ 7 тАФ ╤А╨░╨╖╤А╨╡╤И╨╡╨╜╤Л ╨в╨Ю╨Ы╨м╨Ъ╨Ю flow-╨┐╨░╤А╨░╨╝╨╡╤В╤А╤Л; FSM ╨╕ ╤Ж╨▓╨╡╤В╨╛╨▓╨░╤П ╤Б╨╡╨╝╨░╨╜╤В╨╕╨║╨░ ╨┐╨╛-╨┐╤А╨╡╨╢╨╜╨╡╨╝╤Г ╨╜╨╡ ╤В╤А╨╛╨│╨░╤О╤В╤Б╤П.)
+6. ╨Э╨╡ ╤В╤А╨╛╨│╨░╤В╤М `Assets/Factory_LP/Factory.unity`; ╨н╤В╨░╨┐ 10 (CTA/GameFlow) ╨╕ ╨н╤В╨░╨┐ 11 (PlayableScene)
+   ╨╜╨╡ ╨╜╨░╤З╨╕╨╜╨░╤В╤М ╨▒╨╡╨╖ ╤П╨▓╨╜╨╛╨│╨╛ ╨┐╨╛╨┤╤В╨▓╨╡╤А╨╢╨┤╨╡╨╜╨╕╤П ╨╛╤В╤З╤С╤В╨░.
+7. ╨Э╨╡ ╨▓╤Л╨╖╤Л╨▓╨░╤В╤М `renderer.material(s)` ╨║╨░╨╢╨┤╤Л╨╣ ╨║╨░╨┤╤А.
+8. Fallback ╨┐╤А╨╕ ╨╖╨░╨▓╨╕╤Б╤И╨╡╨╝ Play Mode: `runInBackground=true` тЖТ `EditorApplication.Step()` ╤В╨╛╨╗╤М╨║╨╛
+   ╨▓╨╛ ╨▓╤А╨╡╨╝╨╡╨╜╨╜╨╛╨╝ harness тЖТ cleanup ╤З╨╡╤А╨╡╨╖ try/finally тЖТ ╨▓╨╛╤Б╤Б╤В╨░╨╜╨╛╨▓╨╕╤В╤М `runInBackground` тЖТ
+   ╨▓╤Л╨╣╤В╨╕ ╨╕╨╖ Play Mode тЖТ ╤Г╨┤╨░╨╗╨╕╤В╤М harness.
+
+---
+
+## 7. API-╤Б╨┐╤А╨░╨▓╨║╨░ (╨╕╨╖ ╨║╨╛╨┤╨░)
+
+```csharp
+DraggablePipeController: Spec, State, WorldYaw, IsInteractable, DragPlaneHeight,
+                         Visual,
+                         event Action<DraggablePipeController> Committed,
+                         event Action<DraggablePipeController> DragStarted,       // BeginDrag, ├Ч1
+                         event Action<DraggablePipeController> ReturnedToStock,   // ╨▓╤Е╨╛╨┤ ╨▓ Returning, ├Ч1
+                         BeginDrag(Vector2 screenPos, Camera cam),
+                         UpdateDrag(Vector2 screenPos, Camera cam),
+                         EndDragWithoutPlacement(), CommitPlaced()
+enum DraggablePipeState { Stock, Dragging, Returning, Placed }
+
+PipeSlotController (╨┤╨╛╨┐. ╨║ ╨н╤В╨░╨┐╤Г 8): Visual,
+                         event Action<PipeSlotController, PipeSlotState> StateChanged // SetState, ╤В╨╛╨╗╤М╨║╨╛ ╨┐╤А╨╕ ╤А╨╡╨░╨╗╤М╨╜╨╛╨╝ ╨╕╨╖╨╝╨╡╨╜╨╡╨╜╨╕╨╕
+                         // TryAccept ╨▒╨╛╨╗╤М╤И╨╡ ╨Э╨Х ╤Б╨╜╨╕╨╝╨░╨╡╤В tutorial overlay (╨▓╨╗╨░╨┤╨╡╨╗╨╡╤Ж тАФ TutorialController)
+
+enum TutorialStep { None, HighlightPipe, HighlightSlot, HighlightRotation, Complete }
+TutorialController: CurrentStep, TutorialPipe, TutorialSlot, IsSubscribed,
+                    InitializeTutorial(), ResetTutorial(), DisableTutorial()
+                    // ╨┐╨╛╨┤╨┐╨╕╤Б╨║╨╕ ╤В╨╛╨╗╤М╨║╨╛ ╨╜╨░ ╨╜╨░╨╖╨╜╨░╤З╨╡╨╜╨╜╤Л╨╡ pipe/slot; OnDisable/OnDestroy тЖТ Unsubscribe;
+                    // null тЖТ None ╨▒╨╡╨╖ exception; ╨╜╨╡╤Б╨╛╨▓╨╝╨╡╤Б╤В╨╕╨╝╤Л╨╣ PipeSpec тЖТ 1 LogError + None;
+                    // ╨┐╨╛╤Б╨╗╨╡ Complete тЖТ Unsubscribe; Charging/Powered ╨╜╨╡ ╨┤╨░╤О╤В overlay;
+                    // ╨▓╨╗╨░╨┤╨╡╨╡╤В ╨в╨Ю╨Ы╨м╨Ъ╨Ю Visual.SetTutorialOverlay
+```
+
+Input-harness ╨▓ ╤В╨╡╤Б╤В╨╡ (╨╕╨╜╨░╤З╨╡ Awake ╨╛╤В╨║╨╗╤О╤З╨░╨╡╤В ╨║╨╛╨╝╨┐╨╛╨╜╨╡╨╜╤В):
+`GO.SetActive(false)` тЖТ `AddComponent<PointerInputController>()` тЖТ `SerializedObject`
+╨╜╨░╨╖╨╜╨░╤З╨░╨╡╤В `raycastCamera` / `inputActions` / `pickMask` / `maxRayDistance` тЖТ `SetActive(true)`.
+
+╨г╤Б╤В╨░╤А╨╡╨▓╤И╨╕╨╡ API: `Object.GetInstanceID()` тЖТ `GetEntityId()`;
+`FindObjectsByType<T>(inactive)` ╨▒╨╡╨╖ `FindObjectsSortMode` (╨┐╨╡╤А╨╡╨│╤А╤Г╨╖╨║╨░ ╤Б sort тАФ obsolete);
+`EditorApplication.playModeStateChanged` ╤З╨╕╤В╨░╤В╤М ╨╜╨╡╨╗╤М╨╖╤П (CS0079, ╤В╨╛╨╗╤М╨║╨╛ `+=`/`-=`).
+
+---
+
+## 8. ╨б╨╗╨╡╨┤╤Г╤О╤Й╨╕╨╣ ╤И╨░╨│
+
+1. ╨Ц╨┤╨░╤В╤М ╨┐╨╛╨┤╤В╨▓╨╡╤А╨╢╨┤╨╡╨╜╨╕╤П ╨┐╨╛╨╗╤М╨╖╨╛╨▓╨░╤В╨╡╨╗╤П ╨┐╨╛ ╨Ю╤В╤З╤С╤В╤Г ╨н╤В╨░╨┐╨░ 9 (╨╖╨░╤Д╨╕╨║╤Б╨╕╤А╨╛╨▓╨░╤В╤М ╨▓ Changelog MD ╨┐╨╛╤Б╨╗╨╡ ╨┐╨╛╨┤╤В╨▓╨╡╤А╨╢╨┤╨╡╨╜╨╕╤П).
+2. ╨Я╨╛╤Б╨╗╨╡ ╨┐╨╛╨┤╤В╨▓╨╡╤А╨╢╨┤╨╡╨╜╨╕╤П тАФ **╨н╤В╨░╨┐ 10** (CTA / GameFlow / camera transition) ╤Б╤В╤А╨╛╨│╨╛ ╨┐╨╛ `factory-pipe-techdoc.md`.
+3. **╨н╤В╨░╨┐ 10 ╨╕ ╨н╤В╨░╨┐ 11 (PlayableScene, ╤Д╨╕╨╜╨░╨╗╤М╨╜╤Л╨╡ prefabs Start/End) ╨╖╨░╨┐╤А╨╡╤Й╨╡╨╜╤Л ╨┤╨╛ ╤П╨▓╨╜╨╛╨│╨╛ ╨┐╨╛╨┤╤В╨▓╨╡╤А╨╢╨┤╨╡╨╜╨╕╤П ╨╛╤В╤З╤С╤В╨░.**
+4. ╨Я╨╡╤А╨╡╨┤ ╨н╤В╨░╨┐╨╛╨╝ 10 тАФ ╨┐╨╡╤А╨╡╤З╨╕╤В╨░╤В╤М `AGENTS.md` ╨╕ `factory-pipe-techdoc.md`.
