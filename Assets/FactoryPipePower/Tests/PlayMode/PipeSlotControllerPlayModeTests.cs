@@ -27,13 +27,19 @@ namespace FactoryPipePower.PlayModeTests
         GameObject harness;
         GameObject cameraGo;
         Camera cam;
+        Mouse testMouse;
         bool previousRunInBackground;
+        System.Reflection.FieldInfo positionActionField;
+        System.Reflection.FieldInfo pressActionField;
 
         [SetUp]
         public void SetUp()
         {
             previousRunInBackground = Application.runInBackground;
             Application.runInBackground = true;
+            testMouse = InputSystem.AddDevice<Mouse>("VirtualMouse_Test");
+            InputSystem.Update();
+            Debug.Log($"[PRESS-DIAG] SetUp mouseAdded={(testMouse != null && testMouse.added)}");
             cameraGo = new GameObject("Test_Camera");
             cam = cameraGo.AddComponent<Camera>();
             cam.tag = "MainCamera";
@@ -46,6 +52,7 @@ namespace FactoryPipePower.PlayModeTests
         [TearDown]
         public void TearDown()
         {
+            Debug.Log($"[PRESS-DIAG] TearDown mousePresent={(testMouse != null)} mouseAdded={(testMouse != null && testMouse.added)}");
             if (harness != null)
             {
                 Object.DestroyImmediate(harness);
@@ -62,6 +69,11 @@ namespace FactoryPipePower.PlayModeTests
                 Object.DestroyImmediate(cameraGo);
                 cameraGo = null;
                 cam = null;
+            }
+            if (testMouse != null && testMouse.added)
+            {
+                InputSystem.RemoveDevice(testMouse);
+                testMouse = null;
             }
             Application.runInBackground = previousRunInBackground;
         }
@@ -108,6 +120,9 @@ namespace FactoryPipePower.PlayModeTests
             harness.SetActive(false);
             var input = harness.AddComponent<PointerInputController>();
             var so = new SerializedObject(input);
+            var ctrlType = typeof(PointerInputController);
+            positionActionField = ctrlType.GetField("positionAction", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            pressActionField = ctrlType.GetField("pressAction", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             so.FindProperty("raycastCamera").objectReferenceValue = cam;
             so.FindProperty("inputActions").objectReferenceValue =
                 AssetDatabase.LoadAssetAtPath<InputActionAsset>(InputActionsPath);
@@ -116,35 +131,74 @@ namespace FactoryPipePower.PlayModeTests
             so.FindProperty("maxRayDistance").floatValue = 100f;
             so.ApplyModifiedPropertiesWithoutUndo();
             harness.SetActive(true);
+            Debug.Log($"[PRESS-DIAG] harness Awake done: enabled={input.enabled} inputBlocked={input.InputBlocked} ActivePipe={(input.ActivePipe != null ? input.ActivePipe.name : "null")} rayCam={(input.RaycastCamera != null ? input.RaycastCamera.name : "null")}");
             return input;
+        }
+
+        void LogPressState(PointerInputController input, string tag)
+        {
+            if (input == null || positionActionField == null || pressActionField == null)
+            {
+                Debug.Log($"[PRESS-DIAG] {tag} reflection fields unavailable");
+                return;
+            }
+            var pa = positionActionField.GetValue(input) as UnityEngine.InputSystem.InputAction;
+            var pr = pressActionField.GetValue(input) as UnityEngine.InputSystem.InputAction;
+            Vector2 pos = pa != null ? pa.ReadValue<Vector2>() : Vector2.zero;
+            float pressVal = pr != null ? pr.ReadValue<float>() : -1f;
+            Debug.Log($"[PRESS-DIAG] {tag} positionAction={pos} positionAction.phase={(pa != null ? pa.phase.ToString() : "null")} pressAction.value={pressVal} pressAction.phase={(pr != null ? pr.phase.ToString() : "null")} ActivePipe={(input.ActivePipe != null ? input.ActivePipe.name : "null")} InputBlocked={input.InputBlocked}");
         }
 
         void QueuePointer(Vector2 screenPosition, bool pressed)
         {
-            var mouse = Mouse.current;
+            var mouse = testMouse != null && testMouse.added ? testMouse : Mouse.current;
+            Debug.Log($"[PRESS-DIAG] QueuePointer testMouse={(testMouse != null ? testMouse.added.ToString() : "null")} mouse={(mouse != null ? mouse.name : "null")} pos={screenPosition} pressed={pressed}");
             if (mouse == null)
-                mouse = InputSystem.AddDevice<Mouse>("VirtualMouse_Test");
+            {
+                Debug.Log("[PRESS-DIAG] QueuePointer ABORT: no mouse");
+                return;
+            }
             var state = new MouseState();
             state.position = screenPosition;
             if (pressed)
                 state = state.WithButton(MouseButton.Left);
             InputSystem.QueueStateEvent(mouse, state);
+            Debug.Log("[PRESS-DIAG] QueueStateEvent queued");
+            InputSystem.Update();
+            Debug.Log("[PRESS-DIAG] InputSystem.Update called");
         }
 
         IEnumerator PressAt(Vector3 worldPoint)
         {
+            Debug.Log($"[PRESS-DIAG] PressAt world={worldPoint} cam={(cam != null ? cam.name : "null")} camPos={(cam != null ? cam.transform.position.ToString() : "null")}");
             var screen = cam.WorldToScreenPoint(worldPoint);
+            Debug.Log($"[PRESS-DIAG] PressAt screen={screen}");
             QueuePointer(screen, false);
+            Debug.Log("[PRESS-DIAG] PressAt before yield1");
             yield return null;
+            Debug.Log("[PRESS-DIAG] PressAt after yield1");
+            InputSystem.Update();
+            Physics.SyncTransforms();
             QueuePointer(screen, true);
+            Debug.Log("[PRESS-DIAG] PressAt before yield2");
             yield return null;
+            Debug.Log("[PRESS-DIAG] PressAt after yield2");
+            InputSystem.Update();
+            Physics.SyncTransforms();
+            LogPressState(harness != null ? harness.GetComponent<PointerInputController>() : null, "after press yield2");
         }
 
         IEnumerator ReleaseAt(Vector3 worldPoint)
         {
             var screen = cam.WorldToScreenPoint(worldPoint);
+            Debug.Log($"[PRESS-DIAG] ReleaseAt world={worldPoint} screen={screen}");
             QueuePointer(screen, false);
+            Debug.Log("[PRESS-DIAG] ReleaseAt before yield");
             yield return null;
+            Debug.Log("[PRESS-DIAG] ReleaseAt after yield");
+            InputSystem.Update();
+            Physics.SyncTransforms();
+            LogPressState(harness != null ? harness.GetComponent<PointerInputController>() : null, "after release yield");
         }
 
         string CurrentBaseMaterialName(PipeSlotController slot)
@@ -190,8 +244,12 @@ namespace FactoryPipePower.PlayModeTests
             Assert.AreEqual(1, mr.sharedMaterials.Length);
             Assert.AreEqual(EmptyMatName, mr.sharedMaterials[0].name, "prefab base material must be M_Slot_Empty");
             Assert.IsNotNull(visual.GetComponent<PipeVisualController>());
-            Assert.Less((anchorY.localPosition - Vector3.zero).magnitude, 1e-5f,
-                "AnchorY local position must be zero");
+            // Large M3 uses the approved AnchorY z=1.5 (mesh-center offset); Small M2 keeps AnchorY at origin.
+            float expectedAnchorY = diameter == PipeDiameter.Large ? 1.5f : 0f;
+            Assert.Less(Mathf.Abs(anchorY.localPosition.z - expectedAnchorY), 1e-5f,
+                "AnchorY local Z must match the approved per-diameter offset");
+            Assert.Less(anchorY.localPosition.x, 1e-5f, "AnchorY local X must be zero");
+            Assert.Less(anchorY.localPosition.y, 1e-5f, "AnchorY local Y must be zero");
             Assert.Less(Quaternion.Angle(anchorY.localRotation, Quaternion.identity), 0.01f,
                 "AnchorY local rotation must start at identity");
 

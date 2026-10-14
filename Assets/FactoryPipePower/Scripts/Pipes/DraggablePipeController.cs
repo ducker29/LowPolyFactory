@@ -58,7 +58,7 @@ namespace FactoryPipePower
         {
             if (state == DraggablePipeState.Dragging)
             {
-                ApplyMovement(dragTargetPosition, transform.rotation);
+                ApplyMovement(dragTargetPosition, stockRotation);
             }
             else if (state == DraggablePipeState.Returning)
             {

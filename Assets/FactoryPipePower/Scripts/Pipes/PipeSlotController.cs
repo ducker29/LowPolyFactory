@@ -348,8 +348,8 @@ namespace FactoryPipePower
             {
                 PipeSlotState.Empty => emptyMaterial,
                 PipeSlotState.HoverValid => hoverValidMaterial,
-                PipeSlotState.OccupiedWrongRotation => wrongMaterial,
-                PipeSlotState.OccupiedAligned => defaultMaterial,
+                PipeSlotState.OccupiedWrongRotation => defaultMaterial,
+                PipeSlotState.OccupiedAligned => wrongMaterial,
                 _ => null
             };
 
