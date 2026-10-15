@@ -600,7 +600,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1914460206684070036, guid: 9c26ce00e8a3ffc44996f7eb4504eaa5, type: 3}
       propertyPath: rotationGroup
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7102795087230934393, guid: 9c26ce00e8a3ffc44996f7eb4504eaa5, type: 3}
       propertyPath: m_Name
@@ -880,7 +880,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1914460206684070036, guid: 9c26ce00e8a3ffc44996f7eb4504eaa5, type: 3}
       propertyPath: rotationGroup
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7102795087230934393, guid: 9c26ce00e8a3ffc44996f7eb4504eaa5, type: 3}
       propertyPath: m_Name
@@ -1438,7 +1438,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1914460206684070036, guid: 9c26ce00e8a3ffc44996f7eb4504eaa5, type: 3}
       propertyPath: rotationGroup
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7102795087230934393, guid: 9c26ce00e8a3ffc44996f7eb4504eaa5, type: 3}
       propertyPath: m_Name

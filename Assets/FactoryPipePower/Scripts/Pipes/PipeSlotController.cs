@@ -98,6 +98,7 @@ namespace FactoryPipePower
 
             state = PipeSlotState.Empty;
             ApplyStateMaterial();
+            ApplyTapColliderState();
         }
 
         public bool IsCompatible(DraggablePipeController pipe)
@@ -334,9 +335,16 @@ namespace FactoryPipePower
             bool changed = state != nextState;
             state = nextState;
             ApplyStateMaterial();
+            ApplyTapColliderState();
 
             if (changed)
                 StateChanged?.Invoke(this, nextState);
+        }
+
+        void ApplyTapColliderState()
+        {
+            if (tapCollider != null)
+                tapCollider.enabled = IsOccupied;
         }
 
         void ApplyStateMaterial()

@@ -89,6 +89,16 @@ namespace FactoryPipePower
                 greenRuntimeMaterial.SetFloat(FillId, fill);
             }
 
+            if (!flowConfigured && visualRenderer != null)
+            {
+                Bounds bounds = visualRenderer.bounds;
+                Vector3 direction = visualRenderer.transform.forward.normalized;
+                float length = bounds.size.magnitude;
+                if (length < FlowEpsilon)
+                    length = FlowEpsilon;
+                ConfigureFlow(bounds.center, bounds.center + direction * length);
+            }
+
             ApplyFlowToRuntimeMaterial();
             SetBaseMaterial(greenRuntimeMaterial);
         }
