@@ -15,20 +15,27 @@ namespace FactoryPipePower
         M5 = 5
     }
 
+    public enum PipeShape
+    {
+        Straight = 0,
+        Corner = 1
+    }
+
     [System.Serializable]
     public struct PipeSpec : System.IEquatable<PipeSpec>
     {
         public PipeDiameter diameter;
         public PipeLength length;
+        public PipeShape shape;
 
         public bool Equals(PipeSpec other)
-            => diameter == other.diameter && length == other.length;
+            => diameter == other.diameter && length == other.length && shape == other.shape;
 
         public override bool Equals(object obj)
             => obj is PipeSpec other && Equals(other);
 
         public override int GetHashCode()
-            => ((int)diameter * 397) ^ (int)length;
+            => (((int)diameter * 397) ^ (int)length) * 397 ^ (int)shape;
 
         public static bool operator ==(PipeSpec left, PipeSpec right)
             => left.Equals(right);
@@ -41,6 +48,14 @@ namespace FactoryPipePower
     {
         Yaw0Or180,
         Yaw90Or270
+    }
+
+    public enum CornerRotationGroup
+    {
+        Input0Output270 = 0,
+        Input90Output0 = 1,
+        Input180Output90 = 2,
+        Input270Output180 = 3
     }
 
     public enum DraggablePipeState

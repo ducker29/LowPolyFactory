@@ -9,7 +9,8 @@ namespace FactoryPipePower
     {
         [SerializeField] PipeSpec spec;
         [SerializeField] PipeVisualController visual;
-        [SerializeField] BoxCollider dragCollider;
+        [SerializeField] Collider dragCollider;
+        [SerializeField] Collider[] additionalDragColliders = Array.Empty<Collider>();
         [SerializeField] Rigidbody body;
         [SerializeField] Material defaultMaterial;
         [SerializeField] float returnDuration = 0.25f;
@@ -87,8 +88,7 @@ namespace FactoryPipePower
             state = DraggablePipeState.Dragging;
             dragTargetPosition = transform.position;
 
-            if (dragCollider != null)
-                dragCollider.enabled = true;
+            SetDragCollidersEnabled(true);
 
             if (visual != null)
                 visual.SetTutorialOverlay(false);
@@ -119,8 +119,7 @@ namespace FactoryPipePower
 
             state = DraggablePipeState.Returning;
 
-            if (dragCollider != null)
-                dragCollider.enabled = false;
+            SetDragCollidersEnabled(false);
 
             returnStartPosition = transform.position;
             returnStartRotation = transform.rotation;
@@ -142,8 +141,7 @@ namespace FactoryPipePower
 
             state = DraggablePipeState.Placed;
 
-            if (dragCollider != null)
-                dragCollider.enabled = false;
+            SetDragCollidersEnabled(false);
 
             if (visual != null)
             {
@@ -179,11 +177,25 @@ namespace FactoryPipePower
                 body.rotation = stockRotation;
             }
 
-            if (dragCollider != null)
-                dragCollider.enabled = true;
+            SetDragCollidersEnabled(true);
 
             if (visual != null && defaultMaterial != null)
                 visual.SetBaseMaterial(defaultMaterial);
+        }
+
+        void SetDragCollidersEnabled(bool value)
+        {
+            if (dragCollider != null)
+                dragCollider.enabled = value;
+
+            if (additionalDragColliders == null)
+                return;
+
+            for (int i = 0; i < additionalDragColliders.Length; i++)
+            {
+                if (additionalDragColliders[i] != null)
+                    additionalDragColliders[i].enabled = value;
+            }
         }
 
         void ApplyMovement(Vector3 position, Quaternion rotation)

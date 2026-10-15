@@ -9,6 +9,7 @@ namespace FactoryPipePower
     {
         [SerializeField] PipeSpec expectedSpec;
         [SerializeField] RotationGroup rotationGroup;
+        [SerializeField] CornerRotationGroup expectedCornerGroup;
         [SerializeField] Transform anchorY;
         [SerializeField] PipeVisualController slotVisual;
         [SerializeField] Transform connectorA;
@@ -35,6 +36,7 @@ namespace FactoryPipePower
         IPowerNode nextNode;
         bool hasCharged;
         Coroutine chargeRoutine;
+        bool revalidating;
 
         public PipeSpec ExpectedSpec => expectedSpec;
         public PipeSlotState State => state;
@@ -42,8 +44,8 @@ namespace FactoryPipePower
             || state == PipeSlotState.OccupiedAligned
             || state == PipeSlotState.Charging
             || state == PipeSlotState.Powered;
-        public bool IsAligned => anchorY != null
-            && QuarterTurnUtility.IsAligned(anchorY.localEulerAngles.y, rotationGroup);
+        public bool IsAligned => anchorY != null && ComputeIsAligned();
+        public CornerRotationGroup ExpectedCornerGroup => expectedCornerGroup;
         public Transform AnchorY => anchorY;
         public Transform ConnectorA => connectorA;
         public Transform ConnectorB => connectorB;
@@ -130,6 +132,7 @@ namespace FactoryPipePower
 
             SetState(PipeSlotState.OccupiedWrongRotation);
             EvaluateAlignment();
+            RevalidateLocalAndNeighbours();
 
             return true;
         }
@@ -194,6 +197,7 @@ namespace FactoryPipePower
                 anchorY.localRotation = authoringAnchorRotation;
 
             SetState(PipeSlotState.Empty);
+            RevalidateLocalAndNeighbours();
         }
 
         public void NotifyPreviousPowered(IPowerNode previous)
@@ -217,8 +221,84 @@ namespace FactoryPipePower
                 return;
             if (chargeRoutine != null)
                 return;
+            if (!AreDirectionsValid())
+                return;
 
             chargeRoutine = StartCoroutine(ChargeRoutine());
+        }
+
+        bool AreDirectionsValid()
+        {
+            if (acceptedPipe == null || anchorY == null)
+                return false;
+
+            PipeShape currentShape = acceptedPipe.Spec.shape;
+            int currentYaw = PipeDirectionsUtility.NormalizeQuarter(anchorY.eulerAngles.y);
+
+            bool hasPrevious = TryGetNeighbourOrientation(
+                previousNode, out PipeShape previousShape, out int previousYaw, out Vector3 previousPosition);
+            bool hasNext = TryGetNeighbourOrientation(
+                nextNode, out PipeShape nextShape, out int nextYaw, out Vector3 nextPosition);
+
+            if (hasPrevious
+                && !PipeDirectionsUtility.AreNeighboursCompatible(
+                    previousShape, previousYaw, currentShape, currentYaw))
+                return false;
+
+            if (currentShape == PipeShape.Straight && hasPrevious && hasNext
+                && !PipeDirectionsUtility.AreSegmentLinksDistinct(
+                    previousShape, previousYaw, previousPosition,
+                    currentShape, currentYaw, transform.position,
+                    nextShape, nextYaw, nextPosition))
+                return false;
+
+            return true;
+        }
+
+        static bool TryGetNeighbourOrientation(
+            IPowerNode node, out PipeShape shape, out int yawQuarterDegrees, out Vector3 position)
+        {
+            shape = PipeShape.Straight;
+            yawQuarterDegrees = 0;
+            position = default;
+
+            if (node is PipeSlotController slot
+                && slot.AcceptedPipe != null
+                && slot.AnchorY != null)
+            {
+                shape = slot.AcceptedPipe.Spec.shape;
+                yawQuarterDegrees = PipeDirectionsUtility.NormalizeQuarter(slot.AnchorY.eulerAngles.y);
+                position = slot.transform.position;
+                return true;
+            }
+
+            return false;
+        }
+
+        void RevalidateLocalAndNeighbours()
+        {
+            if (revalidating)
+                return;
+
+            revalidating = true;
+            try
+            {
+                RevalidateLocal();
+                (previousNode as PipeSlotController)?.RevalidateLocal();
+                (nextNode as PipeSlotController)?.RevalidateLocal();
+            }
+            finally
+            {
+                revalidating = false;
+            }
+        }
+
+        void RevalidateLocal()
+        {
+            if (isRotating)
+                return;
+
+            EvaluateAlignment();
         }
 
         public void ResetPowerState()
@@ -265,7 +345,18 @@ namespace FactoryPipePower
                     out Vector3 flowEnd);
 
                 if (slotVisual != null)
-                    slotVisual.ConfigureFlow(flowStart, flowEnd);
+                {
+                    if (acceptedPipe != null
+                        && acceptedPipe.Spec.shape == PipeShape.Corner
+                        && TryComputeCornerElbow(out Vector3 elbow))
+                    {
+                        slotVisual.ConfigureCornerFlow(flowStart, elbow, flowEnd);
+                    }
+                    else
+                    {
+                        slotVisual.ConfigureFlow(flowStart, flowEnd);
+                    }
+                }
             }
 
             float duration = Mathf.Max(chargingDuration, 0.0001f);
@@ -287,6 +378,39 @@ namespace FactoryPipePower
             nextNode?.NotifyPreviousPowered(this);
         }
 
+        bool TryComputeCornerElbow(out Vector3 elbow)
+        {
+            elbow = default;
+
+            if (anchorY == null || connectorA == null || connectorB == null)
+                return false;
+
+            int worldYaw = PipeDirectionsUtility.NormalizeQuarter(anchorY.eulerAngles.y);
+            if (!PipeDirectionsUtility.TryGetDirectionVector(
+                    PipeDirectionsUtility.GetCornerInput(worldYaw), out Vector3 inputDir))
+                return false;
+
+            Vector3 inward = -inputDir;
+            Vector3 toB = connectorB.position - connectorA.position;
+            float leg = Vector3.Dot(toB, inward);
+
+            if (Mathf.Abs(leg) < 1e-4f)
+                return false;
+
+            elbow = connectorA.position + inward * leg;
+            return true;
+        }
+
+        bool ComputeIsAligned()
+        {
+            int yaw = PipeDirectionsUtility.NormalizeQuarter(anchorY.localEulerAngles.y);
+
+            if (expectedSpec.shape == PipeShape.Corner)
+                return PipeDirectionsUtility.GetCurrentCornerGroup(yaw) == expectedCornerGroup;
+
+            return QuarterTurnUtility.IsAligned(anchorY.localEulerAngles.y, rotationGroup);
+        }
+
         void EvaluateAlignment()
         {
             if (!IsOccupied || isRotating)
@@ -294,8 +418,7 @@ namespace FactoryPipePower
             if (state == PipeSlotState.Charging || state == PipeSlotState.Powered)
                 return;
 
-            bool aligned = anchorY != null
-                && QuarterTurnUtility.IsAligned(anchorY.localEulerAngles.y, rotationGroup);
+            bool aligned = IsAligned;
 
             SetState(aligned
                 ? PipeSlotState.OccupiedAligned
@@ -327,7 +450,7 @@ namespace FactoryPipePower
             anchorY.localRotation = target;
             rotateRoutine = null;
             isRotating = false;
-            EvaluateAlignment();
+            RevalidateLocalAndNeighbours();
         }
 
         void SetState(PipeSlotState nextState)
@@ -343,8 +466,21 @@ namespace FactoryPipePower
 
         void ApplyTapColliderState()
         {
-            if (tapCollider != null)
-                tapCollider.enabled = IsOccupied;
+            SetTapCollidersEnabled(IsOccupied);
+        }
+
+        void SetTapCollidersEnabled(bool enabled)
+        {
+            if (tapCollider == null)
+                return;
+
+            var colliders = tapCollider.GetComponents<Collider>();
+
+            foreach (var collider in colliders)
+            {
+                if (collider != null)
+                    collider.enabled = enabled;
+            }
         }
 
         void ApplyStateMaterial()
