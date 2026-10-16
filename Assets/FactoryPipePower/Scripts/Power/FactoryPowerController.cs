@@ -11,6 +11,10 @@ namespace FactoryPipePower
         [SerializeField] ParticleSystem[] particleSystems;
         [SerializeField] Animator[] animators;
 
+        [SerializeField] Renderer stateVisualRenderer;
+        [SerializeField] Material offlineStateMaterial;
+        [SerializeField] Material onlineStateMaterial;
+
         FactoryPowerState state = FactoryPowerState.Offline;
 
         public event Action FactoryOnline;
@@ -68,6 +72,35 @@ namespace FactoryPipePower
                 foreach (var a in animators)
                     if (a != null)
                         a.enabled = online;
+
+            ApplyStateVisual(online);
+        }
+
+        void ApplyStateVisual(bool online)
+        {
+            if (stateVisualRenderer == null)
+                return;
+
+            Material target = online ? onlineStateMaterial : offlineStateMaterial;
+            if (target == null)
+                return;
+
+            var materials = stateVisualRenderer.sharedMaterials;
+            bool changed = false;
+            for (int i = 0; i < materials.Length; i++)
+            {
+                if (materials[i] == null)
+                    continue;
+                if (materials[i] != offlineStateMaterial && materials[i] != onlineStateMaterial)
+                    continue;
+                if (materials[i] == target)
+                    continue;
+                materials[i] = target;
+                changed = true;
+            }
+
+            if (changed)
+                stateVisualRenderer.sharedMaterials = materials;
         }
     }
 }

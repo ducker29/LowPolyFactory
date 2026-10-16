@@ -16,6 +16,7 @@ namespace FactoryPipePower
     {
         [SerializeField] DraggablePipeController tutorialPipe;
         [SerializeField] PipeSlotController tutorialSlot;
+        [SerializeField] bool enableOnInitialize = true;
 
         TutorialStep currentStep = TutorialStep.None;
         bool configurationValid;
@@ -45,6 +46,9 @@ namespace FactoryPipePower
 
         public void InitializeTutorial()
         {
+            if (!enableOnInitialize)
+                return;
+
             Unsubscribe();
 
             if (tutorialPipe == null || tutorialSlot == null)
