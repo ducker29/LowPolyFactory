@@ -10,7 +10,6 @@ namespace FactoryPipePower
         [SerializeField] PipeSpec spec;
         [SerializeField] PipeVisualController visual;
         [SerializeField] Collider dragCollider;
-        [SerializeField] Collider[] additionalDragColliders = Array.Empty<Collider>();
         [SerializeField] Rigidbody body;
         [SerializeField] Material defaultMaterial;
         [SerializeField] float returnDuration = 0.25f;
@@ -187,15 +186,6 @@ namespace FactoryPipePower
         {
             if (dragCollider != null)
                 dragCollider.enabled = value;
-
-            if (additionalDragColliders == null)
-                return;
-
-            for (int i = 0; i < additionalDragColliders.Length; i++)
-            {
-                if (additionalDragColliders[i] != null)
-                    additionalDragColliders[i].enabled = value;
-            }
         }
 
         void ApplyMovement(Vector3 position, Quaternion rotation)

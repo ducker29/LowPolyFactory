@@ -25,15 +25,20 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _EmissionStrength: 1
+    - _EmissionStrength: 0.4
     - _Fill: 0
     - _FillSoftness: 0.02
+    - _FlowCornerMode: 0
     - _FlowLength: 1
+    - _FresnelIntensity: 0.25
+    - _FresnelPower: 4
     m_Colors:
     - _DefaultColor: {r: 0.41999996, g: 0.45, b: 0.41999996, a: 1}
     - _EmissionColor: {r: 0.19999996, g: 1, b: 0.39999998, a: 1}
+    - _FlowCornerWS: {r: 0, g: 0, b: 0, a: 0}
     - _FlowDirectionWS: {r: 0, g: 0, b: 1, a: 0}
     - _FlowOriginWS: {r: 0, g: 0, b: 0, a: 0}
+    - _FresnelColor: {r: 0.55, g: 0.95, b: 0.45, a: 1}
     - _PoweredColor: {r: 0.14999998, g: 0.85, b: 0.29999998, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

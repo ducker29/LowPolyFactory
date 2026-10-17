@@ -83,8 +83,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.4036725, y: 0.52371633, z: 1.4026397}
-  m_Center: {x: -0.43816516, y: -0.0000000068624195, z: -0.66131985}
+  m_Size: {x: 1.3361199, y: 0.52371633, z: 1.3318704}
+  m_Center: {x: -0.43977356, y: 0, z: -0.6613198}
 --- !u!114 &564300540984215553
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -108,7 +108,6 @@ GameObject:
   m_Component:
   - component: {fileID: 525398726278840060}
   - component: {fileID: 8438118340065818075}
-  - component: {fileID: 826201372100719433}
   m_Layer: 9
   m_Name: TapCollider
   m_TagString: Untagged
@@ -150,29 +149,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.44371632, y: 0.44371632, z: 1.3226397}
-  m_Center: {x: 0.000000019868216, y: 0, z: -0.66133225}
---- !u!65 &826201372100719433
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2120837928574416699}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1.3236724, y: 0.44371632, z: 0.44371632}
-  m_Center: {x: -0.43816513, y: 0, z: -1.1000129}
+  m_Size: {x: 1.3154652, y: 0.44371632, z: 1.3129894}
+  m_Center: {x: -0.42944086, y: 0, z: -0.6822414}
 --- !u!1 &3646340189323741242
 GameObject:
   m_ObjectHideFlags: 0
@@ -235,8 +213,6 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -258,11 +234,9 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &1881518025866414893
 MonoBehaviour:

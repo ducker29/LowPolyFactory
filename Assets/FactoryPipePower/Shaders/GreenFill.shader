@@ -13,6 +13,9 @@ Shader "FactoryPipePower/GreenFill"
         _FillSoftness("Fill Softness", Float) = 0.02
         [Toggle] _FlowCornerMode("Flow Corner Mode", Float) = 0
         _FlowCornerWS("Flow Corner (World, W = Leg1 Length)", Vector) = (0, 0, 0, 0)
+        _FresnelColor("Fresnel Color", Color) = (0.55, 0.95, 0.45, 1)
+        _FresnelPower("Fresnel Power", Range(1, 8)) = 4
+        _FresnelIntensity("Fresnel Intensity", Range(0, 1)) = 0.25
     }
 
     SubShader
@@ -29,6 +32,7 @@ Shader "FactoryPipePower/GreenFill"
             #pragma fragment frag
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _DefaultColor;
@@ -42,17 +46,22 @@ Shader "FactoryPipePower/GreenFill"
                 float  _FillSoftness;
                 float  _FlowCornerMode;
                 float4 _FlowCornerWS;
+                float4 _FresnelColor;
+                float  _FresnelPower;
+                float  _FresnelIntensity;
             CBUFFER_END
 
             struct Attributes
             {
                 float4 positionOS : POSITION;
+                float3 normalOS : NORMAL;
             };
 
             struct Varyings
             {
                 float4 positionCS : SV_POSITION;
                 float3 positionWS : TEXCOORD0;
+                float3 normalWS : TEXCOORD1;
             };
 
             Varyings vert(Attributes input)
@@ -60,6 +69,7 @@ Shader "FactoryPipePower/GreenFill"
                 Varyings output;
                 output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
                 output.positionWS = TransformObjectToWorld(input.positionOS.xyz);
+                output.normalWS = TransformObjectToWorldNormal(input.normalOS);
                 return output;
             }
 
@@ -103,8 +113,23 @@ Shader "FactoryPipePower/GreenFill"
                 float mask = smoothstep(fillFront - softness, fillFront, progress);
                 float filled = 1.0 - mask;
 
+                float3 normalWS = normalize(input.normalWS);
+
+                // Lit-aware base: URP main light diffuse + SH ambient, no new shader variants.
+                Light mainLight = GetMainLight();
+                half ndl = saturate(dot(normalWS, mainLight.direction));
+                half3 lighting = mainLight.color * ndl + SampleSH(normalWS);
+
                 float3 color = lerp(_DefaultColor.rgb, _PoweredColor.rgb, filled);
+                color *= lighting;
                 color += _EmissionColor.rgb * _EmissionStrength * filled;
+
+                // Additive fresnel rim, active only inside the existing fill mask.
+                float3 viewDirWS = GetWorldSpaceViewDir(input.positionWS);
+                float fresnel = pow(1.0 - saturate(dot(normalWS, viewDirWS)), max(_FresnelPower, 1e-4));
+                float rimMask = fresnel * filled;
+                color += _FresnelColor.rgb * _FresnelIntensity * rimMask;
+
                 return half4(color, 1.0);
             }
             ENDHLSL

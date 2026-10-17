@@ -126,7 +126,10 @@ namespace FactoryPipePower
 
             int quarter = QuarterTurnUtility.GetQuarterTurn(pipe.WorldYaw);
             if (anchorY != null)
-                anchorY.localRotation = QuarterTurnUtility.QuarterTurnToRotation(quarter);
+            {
+                Quaternion targetWorldRotation = QuarterTurnUtility.QuarterTurnToRotation(quarter);
+                anchorY.localRotation = Quaternion.Inverse(transform.rotation) * targetWorldRotation;
+            }
 
             pipe.CommitPlaced();
 
@@ -474,13 +477,7 @@ namespace FactoryPipePower
             if (tapCollider == null)
                 return;
 
-            var colliders = tapCollider.GetComponents<Collider>();
-
-            foreach (var collider in colliders)
-            {
-                if (collider != null)
-                    collider.enabled = enabled;
-            }
+            tapCollider.enabled = enabled;
         }
 
         void ApplyStateMaterial()
