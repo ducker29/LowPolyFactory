@@ -11,6 +11,7 @@ namespace FactoryPipePower
         [SerializeField] Material inactiveMaterial;
         [SerializeField] Material poweredMaterial;
         [SerializeField] FactoryPowerController factoryPowerController;
+        [SerializeField] NarrativePowerSequence narrativePowerSequence;
 
         IPowerNode expectedPrevious;
         EndPowerState state = EndPowerState.Inactive;
@@ -37,8 +38,13 @@ namespace FactoryPipePower
             state = EndPowerState.Inactive;
             activationCount = 0;
 
-            if (visual != null && inactiveMaterial != null)
-                visual.SetBaseMaterial(inactiveMaterial);
+            if (visual != null)
+            {
+                if (inactiveMaterial != null)
+                    visual.SetBaseMaterial(inactiveMaterial);
+                else
+                    visual.ResetVisual();
+            }
         }
 
         public void NotifyPreviousPowered(IPowerNode previous)
@@ -62,7 +68,10 @@ namespace FactoryPipePower
                 }
             }
 
-            factoryPowerController?.SetOnline();
+            if (narrativePowerSequence != null)
+                narrativePowerSequence.OnEndPowered();
+            else
+                factoryPowerController?.SetOnline();
         }
     }
 }

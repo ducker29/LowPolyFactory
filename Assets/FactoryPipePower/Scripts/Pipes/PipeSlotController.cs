@@ -24,6 +24,7 @@ namespace FactoryPipePower
         [SerializeField] float chargingDuration = 0.25f;
         [SerializeField] MonoBehaviour previousNodeBehaviour;
         [SerializeField] MonoBehaviour nextNodeBehaviour;
+        [SerializeField] PipeCompletionSparks completionSparks;
 
         PipeSlotState state = PipeSlotState.Empty;
         DraggablePipeController acceptedPipe;
@@ -54,6 +55,7 @@ namespace FactoryPipePower
         public bool PlacementCommitted => placementCommitted;
         public bool IsRotating => isRotating;
         public PipeVisualController Visual => slotVisual;
+        public PipeCompletionSparks CompletionSparks => completionSparks;
 
         public event Action<PipeSlotController, PipeSlotState> StateChanged;
 
@@ -195,6 +197,7 @@ namespace FactoryPipePower
             isRotating = false;
             placementCommitted = false;
             acceptedPipe = null;
+            completionSparks?.StopAndClear();
 
             if (anchorY != null)
                 anchorY.localRotation = authoringAnchorRotation;
@@ -313,6 +316,7 @@ namespace FactoryPipePower
             }
 
             hasCharged = false;
+            completionSparks?.StopAndClear();
 
             if (state == PipeSlotState.Charging || state == PipeSlotState.Powered)
                 state = PipeSlotState.OccupiedAligned;
@@ -338,6 +342,9 @@ namespace FactoryPipePower
             if (previousNode != null && previousNode.PowerOutput != null)
                 previousPosition = previousNode.PowerOutput.position;
 
+            bool flowResolved = false;
+            bool endIsB = false;
+
             if (connectorA != null && connectorB != null)
             {
                 FlowConnectorUtility.ResolveFlowEndpoints(
@@ -346,6 +353,10 @@ namespace FactoryPipePower
                     connectorB.position,
                     out Vector3 flowStart,
                     out Vector3 flowEnd);
+
+                flowResolved = true;
+                endIsB = Vector3.Distance(flowEnd, connectorB.position)
+                    <= Vector3.Distance(flowEnd, connectorA.position);
 
                 if (slotVisual != null)
                 {
@@ -377,6 +388,9 @@ namespace FactoryPipePower
 
             SetState(PipeSlotState.Powered);
             chargeRoutine = null;
+
+            if (flowResolved)
+                completionSparks?.PlayCompletion(endIsB);
 
             nextNode?.NotifyPreviousPowered(this);
         }

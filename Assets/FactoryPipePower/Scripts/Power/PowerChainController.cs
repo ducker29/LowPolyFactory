@@ -9,6 +9,7 @@ namespace FactoryPipePower
         [SerializeField] PipeSlotController[] slots;
         [SerializeField] EndPowerNode endNode;
         [SerializeField] FactoryPowerController factoryPowerController;
+        [SerializeField] NarrativePowerSequence narrativeSequence;
 
         bool initialized;
 
@@ -38,6 +39,7 @@ namespace FactoryPipePower
             LinkChain();
 
             startNode.Initialize();
+            narrativeSequence?.BeginLeftChain();
             initialized = true;
         }
 

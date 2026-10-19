@@ -18,6 +18,7 @@ namespace FactoryPipePower
         FactoryPowerState state = FactoryPowerState.Offline;
 
         public event Action FactoryOnline;
+        public event Action FactoryOffline;
 
         public FactoryPowerState State => state;
         public bool IsOnline => state == FactoryPowerState.Online;
@@ -31,6 +32,7 @@ namespace FactoryPipePower
         {
             state = FactoryPowerState.Offline;
             Apply(false);
+            FactoryOffline?.Invoke();
         }
 
         public void SetOnline()

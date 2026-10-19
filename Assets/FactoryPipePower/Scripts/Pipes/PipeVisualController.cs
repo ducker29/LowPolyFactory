@@ -13,10 +13,13 @@ namespace FactoryPipePower
         static readonly int FlowLengthId = Shader.PropertyToID("_FlowLength");
         static readonly int FlowCornerModeId = Shader.PropertyToID("_FlowCornerMode");
         static readonly int FlowCornerWsId = Shader.PropertyToID("_FlowCornerWS");
+        static readonly int DefaultColorId = Shader.PropertyToID("_DefaultColor");
 
         [SerializeField] MeshRenderer visualRenderer;
         [SerializeField] Material tutorialOverlayMaterial;
         [SerializeField] Material greenFillTemplate;
+        [SerializeField] bool overrideFillDefaultColor;
+        [SerializeField] Color fillDefaultColor = Color.white;
 
         Material currentBaseMaterial;
         Material initialBaseMaterial;
@@ -91,6 +94,9 @@ namespace FactoryPipePower
                     name = $"{greenFillTemplate.name} (Runtime {name})"
                 };
                 greenRuntimeMaterial.SetFloat(FillId, fill);
+
+                if (overrideFillDefaultColor && greenRuntimeMaterial.HasProperty(DefaultColorId))
+                    greenRuntimeMaterial.SetColor(DefaultColorId, fillDefaultColor);
             }
 
             if (!flowConfigured && visualRenderer != null)

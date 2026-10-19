@@ -8,11 +8,13 @@ namespace FactoryPipePower
         [SerializeField] Transform powerOutput;
         [SerializeField] MonoBehaviour nextNodeBehaviour;
         [SerializeField] PipeVisualController visual;
+        [SerializeField] bool deferPowerActivation;
 
         IPowerNode nextNode;
         bool isPowered;
 
         public bool IsPowered => isPowered;
+        public bool DeferPowerActivation => deferPowerActivation;
         public Transform PowerOutput => powerOutput != null ? powerOutput : transform;
         public IPowerNode NextNode => nextNode;
 
@@ -29,6 +31,32 @@ namespace FactoryPipePower
 
         public void Initialize()
         {
+            if (deferPowerActivation)
+            {
+                isPowered = false;
+
+                if (visual != null)
+                    visual.ResetVisual();
+
+                return;
+            }
+
+            isPowered = true;
+
+            if (visual != null)
+            {
+                visual.UseGreenRuntimeMaterial();
+                visual.SetFill(1f);
+            }
+
+            nextNode?.NotifyPreviousPowered(this);
+        }
+
+        public void ProvidePower()
+        {
+            if (isPowered)
+                return;
+
             isPowered = true;
 
             if (visual != null)
