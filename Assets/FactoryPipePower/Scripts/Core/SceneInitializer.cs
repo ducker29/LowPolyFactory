@@ -9,6 +9,7 @@ namespace FactoryPipePower
         [SerializeField] PipeSlotRegistry registry;
         [SerializeField] PowerChainController powerChain;
         [SerializeField] TutorialController tutorial;
+        [SerializeField] FactoryTutorialController factoryTutorial;
         [SerializeField] PipeSlotController[] slots;
 
         bool initialized;
@@ -61,7 +62,11 @@ namespace FactoryPipePower
                 registry.Register(slots[i]);
 
             powerChain.Initialize();
-            tutorial.InitializeTutorial();
+
+            if (factoryTutorial != null)
+                factoryTutorial.InitializeTutorial();
+            else if (tutorial != null)
+                tutorial.InitializeTutorial();
 
             pointerInput.SetInputBlocked(false);
             initialized = true;

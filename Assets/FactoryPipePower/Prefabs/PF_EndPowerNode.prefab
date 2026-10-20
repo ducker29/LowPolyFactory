@@ -1,5 +1,60 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1384335199651233496
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4565772580898595943}
+  - component: {fileID: 7752378071655278684}
+  m_Layer: 0
+  m_Name: Collider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4565772580898595943
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1384335199651233496}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -1.521}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5847628258518304193}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &7752378071655278684
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1384335199651233496}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.9
+  m_Height: 4.3
+  m_Direction: 2
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5639796852118126782
 GameObject:
   m_ObjectHideFlags: 0
@@ -61,6 +116,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 4565772580898595943}
   - {fileID: 1463244891333196206}
   - {fileID: 2411686924990764322}
   - {fileID: 6382485319394951118}
@@ -84,6 +140,7 @@ MonoBehaviour:
   inactiveMaterial: {fileID: 0}
   poweredMaterial: {fileID: 0}
   factoryPowerController: {fileID: 0}
+  narrativePowerSequence: {fileID: 0}
 --- !u!1001 &2806500159133463241
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -231,6 +288,8 @@ MonoBehaviour:
   visualRenderer: {fileID: 5248954478189708449}
   tutorialOverlayMaterial: {fileID: 2100000, guid: dc607c903d489eb4d9692789ff566b17, type: 2}
   greenFillTemplate: {fileID: 2100000, guid: e2bd03655091f494ea67fedaac72eee9, type: 2}
+  overrideFillDefaultColor: 0
+  fillDefaultColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!4 &6382485319394951118 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: afec01857b1d7db4cbd30ac5322e96c7, type: 3}

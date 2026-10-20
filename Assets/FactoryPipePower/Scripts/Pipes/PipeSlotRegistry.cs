@@ -16,6 +16,12 @@ namespace FactoryPipePower
         public int DragStartsHandled { get; private set; }
         public int DragFinishesHandled { get; private set; }
 
+        // Tutorial exception: when set, only this slot is highlighted as HoverValid.
+        public PipeSlotController HoverFilter { get; set; }
+
+        // Tutorial exception: when set, only this slot may accept a placed pipe.
+        public PipeSlotController AcceptFilter { get; set; }
+
         void OnEnable()
         {
             DraggablePipeController.AnyDragStarted += OnAnyDragStarted;
@@ -37,6 +43,7 @@ namespace FactoryPipePower
                 return;
 
             slots.Add(slot);
+            slot.OwnerRegistry = this;
         }
 
         public void Unregister(PipeSlotController slot)
@@ -45,6 +52,8 @@ namespace FactoryPipePower
                 return;
 
             slots.Remove(slot);
+            if (slot.OwnerRegistry == this)
+                slot.OwnerRegistry = null;
         }
 
         void OnAnyDragStarted(DraggablePipeController pipe)
@@ -69,6 +78,8 @@ namespace FactoryPipePower
                 if (slot.IsOccupied)
                     continue;
                 if (!slot.IsCompatible(pipe))
+                    continue;
+                if (HoverFilter != null && slot != HoverFilter)
                     continue;
 
                 slot.SetHoverValid(true);

@@ -61,7 +61,13 @@ Shader "FactoryPipePower/TutorialOverlay"
                 output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
 
                 // Небольшой depth bias к камере против z-fighting с базовой поверхностью.
-                output.positionCS.z -= _DepthOffset * output.positionCS.w;
+                // На reversed-Z платформах (D3D/Vulkan) ближе к камере = больше z,
+                // поэтому знак инвертируется, иначе overlay уходит за базовый меш.
+                #if UNITY_REVERSED_Z
+                    output.positionCS.z += _DepthOffset * output.positionCS.w;
+                #else
+                    output.positionCS.z -= _DepthOffset * output.positionCS.w;
+                #endif
 
                 return output;
             }

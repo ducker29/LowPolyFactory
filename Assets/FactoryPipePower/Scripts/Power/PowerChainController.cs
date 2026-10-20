@@ -39,7 +39,10 @@ namespace FactoryPipePower
             LinkChain();
 
             startNode.Initialize();
-            narrativeSequence?.BeginLeftChain();
+
+            if (narrativeSequence != null && !narrativeSequence.TutorialControlled)
+                narrativeSequence.BeginLeftChain();
+
             initialized = true;
         }
 

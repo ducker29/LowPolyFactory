@@ -7,9 +7,9 @@ namespace FactoryPipePower
     [DisallowMultipleComponent]
     public class SmokePipeIndicatorSequence : MonoBehaviour
     {
-        const float FirstStepTime = 0.5f;
-        const float SecondStepTime = 1.0f;
-        const float ThirdStepTime = 1.5f;
+        const float FirstStepTime = 0.3f;
+        const float SecondStepTime = 0.6f;
+        const float ThirdStepTime = 0.9f;
 
         enum Phase
         {

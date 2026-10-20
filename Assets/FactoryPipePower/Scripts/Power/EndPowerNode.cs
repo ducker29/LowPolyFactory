@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace FactoryPipePower
@@ -21,6 +22,8 @@ namespace FactoryPipePower
         public Transform PowerOutput => powerInput != null ? powerInput : transform;
         public EndPowerState State => state;
         public int ActivationCount => activationCount;
+
+        public event Action<EndPowerNode> Powered;
 
         void Awake()
         {
@@ -67,6 +70,8 @@ namespace FactoryPipePower
                     visual.SetFill(1f);
                 }
             }
+
+            Powered?.Invoke(this);
 
             if (narrativePowerSequence != null)
                 narrativePowerSequence.OnEndPowered();

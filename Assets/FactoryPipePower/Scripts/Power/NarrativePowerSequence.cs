@@ -19,6 +19,9 @@ namespace FactoryPipePower
         [Header("Timing")]
         [SerializeField] float initialDelay = 1f;
 
+        [Header("Tutorial")]
+        [SerializeField] bool tutorialControlled;
+
         Coroutine leftRoutine;
         Coroutine rightRoutine;
         bool rightStarted;
@@ -27,6 +30,7 @@ namespace FactoryPipePower
         public bool RightStarted => rightStarted;
         public bool LeftRunning => leftRoutine != null;
         public bool RightRunning => rightRoutine != null;
+        public bool TutorialControlled => tutorialControlled;
         public StartPowerNode StartNode => startNode;
         public EndPowerNode EndNode => endNode;
         public NarrativePipeSegment[] LeftSegments => leftSegments;
@@ -56,6 +60,14 @@ namespace FactoryPipePower
 
         public void OnEndPowered()
         {
+            if (tutorialControlled)
+                return;
+
+            BeginRightChain();
+        }
+
+        public void BeginRightChain()
+        {
             if (rightStarted)
                 return;
 
@@ -65,7 +77,9 @@ namespace FactoryPipePower
 
         IEnumerator RunLeftChain()
         {
-            if (initialDelay > 0f)
+            // Tutorial starts the left chain right after the camera arrives,
+            // so the pre-fill delay must not apply there.
+            if (initialDelay > 0f && !tutorialControlled)
                 yield return new WaitForSeconds(initialDelay);
 
             if (leftSegments != null)

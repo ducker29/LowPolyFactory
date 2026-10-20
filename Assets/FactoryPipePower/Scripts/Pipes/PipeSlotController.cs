@@ -53,6 +53,7 @@ namespace FactoryPipePower
         public RotationGroup SlotRotationGroup => rotationGroup;
         public DraggablePipeController AcceptedPipe => acceptedPipe;
         public bool PlacementCommitted => placementCommitted;
+        public PipeSlotRegistry OwnerRegistry { get; set; }
         public bool IsRotating => isRotating;
         public PipeVisualController Visual => slotVisual;
         public PipeCompletionSparks CompletionSparks => completionSparks;
@@ -121,6 +122,10 @@ namespace FactoryPipePower
             if (pipe.State != DraggablePipeState.Dragging)
                 return false;
             if (!expectedSpec.Equals(pipe.Spec))
+                return false;
+            if (OwnerRegistry != null
+                && OwnerRegistry.AcceptFilter != null
+                && OwnerRegistry.AcceptFilter != this)
                 return false;
 
             placementCommitted = true;

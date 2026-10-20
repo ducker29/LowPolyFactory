@@ -113,6 +113,10 @@ Shader "FactoryPipePower/GreenFill"
                 float mask = smoothstep(fillFront - softness, fillFront, progress);
                 float filled = 1.0 - mask;
 
+                // At full fill the softness band would stay at the pipe tip
+                // (progress >= fillFront -> mask 1 -> gray strip). Force it filled.
+                filled = lerp(filled, 1.0, step(0.9999, fillFront));
+
                 float3 normalWS = normalize(input.normalWS);
 
                 // Lit-aware base: URP main light diffuse + SH ambient, no new shader variants.

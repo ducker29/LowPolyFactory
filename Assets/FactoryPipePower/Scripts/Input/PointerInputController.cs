@@ -15,19 +15,42 @@ namespace FactoryPipePower
         [SerializeField] float maxRayDistance = 100f;
         [SerializeField] LayerMask pickMask = ~0;
         [SerializeField] LayerMask slotTapMask = ~0;
+        [SerializeField] MonoBehaviour tutorialGateBehaviour;
 
         InputAction pressAction;
         InputAction positionAction;
         DraggablePipeController activePipe;
         bool inputBlocked;
+        ITutorialInputGate tutorialGate;
+        bool tutorialGateResolved;
 
         public DraggablePipeController ActivePipe => activePipe;
         public Camera RaycastCamera => raycastCamera;
         public bool InputBlocked => inputBlocked;
 
+        public ITutorialInputGate TutorialGate => ResolveTutorialGate();
+
         public void SetInputBlocked(bool blocked)
         {
             inputBlocked = blocked;
+        }
+
+        public void SetTutorialGate(MonoBehaviour gateBehaviour)
+        {
+            tutorialGateBehaviour = gateBehaviour;
+            tutorialGate = null;
+            tutorialGateResolved = false;
+        }
+
+        ITutorialInputGate ResolveTutorialGate()
+        {
+            if (!tutorialGateResolved)
+            {
+                tutorialGate = tutorialGateBehaviour as ITutorialInputGate;
+                tutorialGateResolved = true;
+            }
+
+            return tutorialGate;
         }
 
         void Awake()
@@ -98,12 +121,20 @@ namespace FactoryPipePower
                 return;
 
             Vector2 screenPosition = positionAction.ReadValue<Vector2>();
+            ITutorialInputGate gate = ResolveTutorialGate();
+
+            if (gate != null && gate.TryConsumeAdvancePress(screenPosition))
+                return;
+
             Ray ray = raycastCamera.ScreenPointToRay(screenPosition);
 
             if (Physics.Raycast(ray, out RaycastHit hit, maxRayDistance, pickMask, QueryTriggerInteraction.Ignore))
             {
                 var pipe = hit.collider.GetComponentInParent<DraggablePipeController>();
-                if (pipe != null && pipe.IsInteractable && pipe.State == DraggablePipeState.Stock)
+                if (pipe != null
+                    && pipe.IsInteractable
+                    && pipe.State == DraggablePipeState.Stock
+                    && (gate == null || gate.IsPipeAllowed(pipe)))
                 {
                     activePipe = pipe;
                     pipe.Committed += OnActivePipeCommitted;
@@ -115,7 +146,7 @@ namespace FactoryPipePower
             if (Physics.Raycast(ray, out RaycastHit slotHit, maxRayDistance, slotTapMask, QueryTriggerInteraction.Ignore))
             {
                 var slot = slotHit.collider.GetComponentInParent<PipeSlotController>();
-                if (slot != null)
+                if (slot != null && (gate == null || gate.IsSlotTapAllowed(slot)))
                     slot.TryRotateTap();
             }
         }

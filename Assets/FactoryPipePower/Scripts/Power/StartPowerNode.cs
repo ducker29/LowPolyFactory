@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace FactoryPipePower
@@ -17,6 +18,8 @@ namespace FactoryPipePower
         public bool DeferPowerActivation => deferPowerActivation;
         public Transform PowerOutput => powerOutput != null ? powerOutput : transform;
         public IPowerNode NextNode => nextNode;
+
+        public event Action<StartPowerNode> Powered;
 
         void Awake()
         {
@@ -50,6 +53,7 @@ namespace FactoryPipePower
             }
 
             nextNode?.NotifyPreviousPowered(this);
+            Powered?.Invoke(this);
         }
 
         public void ProvidePower()
@@ -66,6 +70,7 @@ namespace FactoryPipePower
             }
 
             nextNode?.NotifyPreviousPowered(this);
+            Powered?.Invoke(this);
         }
 
         public void NotifyPreviousPowered(IPowerNode previous)
