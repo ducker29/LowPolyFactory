@@ -71,7 +71,7 @@ namespace FactoryPipePower
             }
         }
 
-        public void BeginDrag(Vector2 pointerScreenPosition, Camera camera)
+        public void BeginDrag([Bridge.Ref] Vector2 pointerScreenPosition, Camera camera)
         {
             if (state != DraggablePipeState.Stock)
                 return;
@@ -103,7 +103,7 @@ namespace FactoryPipePower
             DragStarted?.Invoke(this);
         }
 
-        public void UpdateDrag(Vector2 pointerScreenPosition, Camera camera)
+        public void UpdateDrag([Bridge.Ref] Vector2 pointerScreenPosition, Camera camera)
         {
             if (state != DraggablePipeState.Dragging)
                 return;
@@ -207,7 +207,7 @@ namespace FactoryPipePower
                 dragCollider.enabled = state == DraggablePipeState.Dragging;
         }
 
-        Vector3 ClampToObstacles(Vector3 desired)
+        Vector3 ClampToObstacles([Bridge.Ref] Vector3 desired)
         {
             if (dragCollider == null || !dragCollider.enabled)
                 return desired;
@@ -232,9 +232,9 @@ namespace FactoryPipePower
             return SweepClamp(clamped, clamped + remaining, out _, out _);
         }
 
-        Vector3 SweepClamp(Vector3 from, Vector3 desired, out RaycastHit hit, out bool startedInside)
+        Vector3 SweepClamp([Bridge.Ref] Vector3 from, [Bridge.Ref] Vector3 desired, out RaycastHit hit, out bool startedInside)
         {
-            hit = default(?);
+            hit = default(UnityEngine.RaycastHit);
             startedInside = false;
 
             Vector3 delta = desired - from;
@@ -278,7 +278,7 @@ namespace FactoryPipePower
             halfExtents = bounds.extents;
         }
 
-        void ApplyMovement(Vector3 position, Quaternion rotation)
+        void ApplyMovement([Bridge.Ref] Vector3 position, [Bridge.Ref] Quaternion rotation)
         {
             if (body != null)
             {
@@ -291,7 +291,7 @@ namespace FactoryPipePower
             }
         }
 
-        void ComputeDragOffset(Vector2 pointerScreenPosition, Camera camera)
+        void ComputeDragOffset([Bridge.Ref] Vector2 pointerScreenPosition, Camera camera)
         {
             dragOffset = Vector3.zero;
 
@@ -305,9 +305,9 @@ namespace FactoryPipePower
             dragOffset = new Vector3(offset.x, 0f, offset.z);
         }
 
-        bool TryGetPlanePoint(Vector2 screenPosition, Camera camera, out Vector3 point)
+        bool TryGetPlanePoint([Bridge.Ref] Vector2 screenPosition, Camera camera, out Vector3 point)
         {
-            point = default(?);
+            point = default(UnityEngine.Vector3);
             if (camera == null)
                 return false;
 

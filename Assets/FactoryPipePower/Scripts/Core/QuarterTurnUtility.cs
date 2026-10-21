@@ -23,12 +23,15 @@ namespace FactoryPipePower
         public static bool IsAligned(float yaw, RotationGroup group)
         {
             int q = GetQuarterTurn(yaw);
-            return group switch
+            switch (group)
             {
-                RotationGroup.Yaw0Or180 => q == 0 || q == 2,
-                RotationGroup.Yaw90Or270 => q == 1 || q == 3,
-                _ => false
-            };
+                case RotationGroup.Yaw0Or180:
+                    return q == 0 || q == 2;
+                case RotationGroup.Yaw90Or270:
+                    return q == 1 || q == 3;
+                default:
+                    return false;
+            }
         }
     }
 }

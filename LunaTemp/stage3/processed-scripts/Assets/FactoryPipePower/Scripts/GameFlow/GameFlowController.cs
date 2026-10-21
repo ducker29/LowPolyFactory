@@ -16,12 +16,16 @@ namespace FactoryPipePower
     {
         [SerializeField] FactoryPowerController factoryPowerController;
         [SerializeField] CompletionUI completionUI;
+        [SerializeField] CompletedUI completedUI;
         [SerializeField] PointerInputController pointerInput;
         [SerializeField] TutorialController tutorialController;
+        [SerializeField] FactoryTutorialController factoryTutorial;
         [SerializeField] float completionDelay = 0.75f;
+        [SerializeField, Min(0f)] float completedScreenDelay = 1.5f;
 
         GameFlowState state = GameFlowState.Gameplay;
         Coroutine completionRoutine;
+        Coroutine completedScreenRoutine;
         int winTriggerCount;
 
         public GameFlowState State => state;
@@ -40,6 +44,10 @@ namespace FactoryPipePower
 
             if (state == GameFlowState.WinPending && completionRoutine == null)
                 completionRoutine = StartCoroutine(CompleteAfterDelay());
+
+            if (state == GameFlowState.Completed && completedUI != null
+                && !completedUI.IsVisible && completedScreenRoutine == null)
+                completedScreenRoutine = StartCoroutine(ShowCompletedScreenAfterDelay());
         }
 
         void OnDisable()
@@ -51,6 +59,7 @@ namespace FactoryPipePower
                 completionUI.ContinueRequested -= HandleContinueRequested;
 
             completionRoutine = null;
+            completedScreenRoutine = null;
         }
 
         void HandleFactoryOnline()
@@ -83,6 +92,28 @@ namespace FactoryPipePower
 
             state = GameFlowState.Completed;
             completionRoutine = null;
+
+            if (completedUI != null && completedScreenRoutine == null)
+                completedScreenRoutine = StartCoroutine(ShowCompletedScreenAfterDelay());
+        }
+
+        IEnumerator ShowCompletedScreenAfterDelay()
+        {
+            if (completedScreenDelay > 0.0001f)
+                yield return new WaitForSeconds(completedScreenDelay);
+            else
+                yield return null;
+
+            if (completionUI != null)
+                completionUI.Hide();
+
+            if (factoryTutorial != null)
+                factoryTutorial.HideMessage();
+
+            completedScreenRoutine = null;
+
+            if (completedUI != null)
+                completedUI.Show();
         }
 
         void HandleContinueRequested()

@@ -20,7 +20,7 @@ namespace FactoryPipePower
             if (other != null)
             {
                 other.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-                other.Clear(true);
+                other.Clear();
             }
 
             if (chosen == null)
@@ -30,7 +30,7 @@ namespace FactoryPipePower
                 return;
             }
 
-            chosen.Clear(true);
+            chosen.Clear();
             chosen.Play(true);
         }
 
@@ -46,7 +46,7 @@ namespace FactoryPipePower
                 return;
 
             system.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            system.Clear(true);
+            system.Clear();
         }
     }
 }

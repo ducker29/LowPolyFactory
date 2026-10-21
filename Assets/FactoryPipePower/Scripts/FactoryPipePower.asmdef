@@ -3,7 +3,7 @@
     "rootNamespace": "FactoryPipePower",
     "references": [
         "Unity.InputSystem",
-        "Unity.Cinemachine"
+        "Cinemachine"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

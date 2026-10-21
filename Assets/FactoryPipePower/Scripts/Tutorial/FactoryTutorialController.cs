@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using Unity.Cinemachine;
+using Cinemachine;
 
 namespace FactoryPipePower
 {
@@ -29,10 +29,10 @@ namespace FactoryPipePower
     {
         [Header("Cinemachine")]
         [SerializeField] CinemachineBrain cameraBrain;
-        [SerializeField] CinemachineCamera overviewCamera;
-        [SerializeField] CinemachineCamera gameplayCamera;
-        [SerializeField] CinemachineCamera firstPipeCamera;
-        [SerializeField] CinemachineCamera firstChargingCamera;
+        [SerializeField] CinemachineVirtualCamera overviewCamera;
+        [SerializeField] CinemachineVirtualCamera gameplayCamera;
+        [SerializeField] CinemachineVirtualCamera firstPipeCamera;
+        [SerializeField] CinemachineVirtualCamera firstChargingCamera;
         [SerializeField] float blendDuration = 2f;
         [SerializeField] float blendTimeout = 15f;
         [SerializeField] int overviewPriority = 20;
@@ -463,8 +463,8 @@ namespace FactoryPipePower
             if (cameraBrain == null)
                 return;
 
-            cameraBrain.DefaultBlend = new CinemachineBlendDefinition(
-                CinemachineBlendDefinition.Styles.EaseInOut,
+            cameraBrain.m_DefaultBlend = new CinemachineBlendDefinition(
+                CinemachineBlendDefinition.Style.EaseInOut,
                 blendDuration);
         }
 
@@ -494,24 +494,24 @@ namespace FactoryPipePower
             int trailingPriority = gameplayPriority - 1;
 
             if (overviewCamera != null)
-                overviewCamera.Priority.Value = overviewIsLeading ? overviewPriority : trailingPriority;
+                overviewCamera.Priority = overviewIsLeading ? overviewPriority : trailingPriority;
 
             bool chargingLive = !overviewIsLeading && firstChargingIsLeading && firstChargingCamera != null;
             if (firstChargingCamera != null)
-                firstChargingCamera.Priority.Value = chargingLive ? gameplayPriority : trailingPriority;
+                firstChargingCamera.Priority = chargingLive ? gameplayPriority : trailingPriority;
 
             bool pipeLive = !overviewIsLeading && !chargingLive && firstPipeIsLeading && firstPipeCamera != null;
             if (firstPipeCamera != null)
-                firstPipeCamera.Priority.Value = pipeLive ? gameplayPriority : trailingPriority;
+                firstPipeCamera.Priority = pipeLive ? gameplayPriority : trailingPriority;
 
             bool gameplayLeading = !overviewIsLeading && !chargingLive && !pipeLive;
             if (gameplayCamera != null)
-                gameplayCamera.Priority.Value = gameplayLeading ? gameplayPriority : trailingPriority;
+                gameplayCamera.Priority = gameplayLeading ? gameplayPriority : trailingPriority;
         }
 
         IEnumerator RunBlendToGameplay()
         {
-            CinemachineCamera blendTarget = firstChargingCamera != null ? firstChargingCamera : gameplayCamera;
+            CinemachineVirtualCamera blendTarget = firstChargingCamera != null ? firstChargingCamera : gameplayCamera;
             yield return RunBlendAndWait(blendTarget);
             blendRoutine = null;
 
@@ -526,7 +526,7 @@ namespace FactoryPipePower
             onBlendFinished?.Invoke();
         }
 
-        IEnumerator RunBlendAndWait(CinemachineCamera target)
+        IEnumerator RunBlendAndWait(CinemachineVirtualCamera target)
         {
             if (cameraBrain == null || target == null || overviewCamera == null || gameplayCamera == null)
             {
@@ -845,6 +845,10 @@ namespace FactoryPipePower
             RectTransform textRect = messageText.rectTransform;
             float wrapWidth = Mathf.Max(1f, textRect.rect.width);
 
+#if UNITY_LUNA
+            float contentWidth = Mathf.Min(messageText.preferredWidth, wrapWidth);
+            float contentHeight = messageText.preferredHeight;
+#else
             var settings = messageText.GetGenerationSettings(new Vector2(wrapWidth, 0f));
             var generator = messageText.cachedTextGenerator;
             generator.Populate(messageText.text, settings);
@@ -875,6 +879,7 @@ namespace FactoryPipePower
                 contentHeight = (lines[0].topY - lines[lineCount - 1].topY + lines[lineCount - 1].height)
                     / scaleFactor;
             }
+#endif
 
             if (contentWidth <= 0f || contentHeight <= 0f)
             {

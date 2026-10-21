@@ -504,14 +504,25 @@ namespace FactoryPipePower
             if (slotVisual == null)
                 return;
 
-            Material baseMaterial = state switch
+            Material baseMaterial;
+            switch (state)
             {
-                PipeSlotState.Empty => emptyMaterial,
-                PipeSlotState.HoverValid => hoverValidMaterial,
-                PipeSlotState.OccupiedWrongRotation => defaultMaterial,
-                PipeSlotState.OccupiedAligned => wrongMaterial,
-                _ => null
-            };
+                case PipeSlotState.Empty:
+                    baseMaterial = emptyMaterial;
+                    break;
+                case PipeSlotState.HoverValid:
+                    baseMaterial = hoverValidMaterial;
+                    break;
+                case PipeSlotState.OccupiedWrongRotation:
+                    baseMaterial = defaultMaterial;
+                    break;
+                case PipeSlotState.OccupiedAligned:
+                    baseMaterial = wrongMaterial;
+                    break;
+                default:
+                    baseMaterial = null;
+                    break;
+            }
 
             if (baseMaterial != null)
                 slotVisual.SetBaseMaterial(baseMaterial);

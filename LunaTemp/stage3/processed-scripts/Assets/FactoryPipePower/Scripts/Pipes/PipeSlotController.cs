@@ -271,7 +271,7 @@ namespace FactoryPipePower
         {
             shape = PipeShape.Straight;
             yawQuarterDegrees = 0;
-            position = default(?);
+            position = default(UnityEngine.Vector3);
 
             if (node is PipeSlotController slot
                 && slot.AcceptedPipe != null
@@ -402,7 +402,7 @@ namespace FactoryPipePower
 
         bool TryComputeCornerElbow(out Vector3 elbow)
         {
-            elbow = default(?);
+            elbow = default(UnityEngine.Vector3);
 
             if (anchorY == null || connectorA == null || connectorB == null)
                 return false;
@@ -504,14 +504,25 @@ namespace FactoryPipePower
             if (slotVisual == null)
                 return;
 
-            Material baseMaterial = state switch
+            Material baseMaterial;
+            switch (state)
             {
-                PipeSlotState.Empty => emptyMaterial,
-                PipeSlotState.HoverValid => hoverValidMaterial,
-                PipeSlotState.OccupiedWrongRotation => defaultMaterial,
-                PipeSlotState.OccupiedAligned => wrongMaterial,
-                _ => null
-            };
+                case PipeSlotState.Empty:
+                    baseMaterial = emptyMaterial;
+                    break;
+                case PipeSlotState.HoverValid:
+                    baseMaterial = hoverValidMaterial;
+                    break;
+                case PipeSlotState.OccupiedWrongRotation:
+                    baseMaterial = defaultMaterial;
+                    break;
+                case PipeSlotState.OccupiedAligned:
+                    baseMaterial = wrongMaterial;
+                    break;
+                default:
+                    baseMaterial = null;
+                    break;
+            }
 
             if (baseMaterial != null)
                 slotVisual.SetBaseMaterial(baseMaterial);

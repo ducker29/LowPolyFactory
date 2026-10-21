@@ -5,9 +5,9 @@ namespace FactoryPipePower
     public static class FlowConnectorUtility
     {
         public static void ResolveFlowEndpoints(
-            Vector3 previousOutputWorld,
-            Vector3 connectorAWorld,
-            Vector3 connectorBWorld,
+[Bridge.Ref]             Vector3 previousOutputWorld,
+[Bridge.Ref]             Vector3 connectorAWorld,
+[Bridge.Ref]             Vector3 connectorBWorld,
             out Vector3 startWorld,
             out Vector3 endWorld)
         {

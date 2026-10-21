@@ -121,7 +121,7 @@ namespace FactoryPipePower
                 greenRuntimeMaterial.SetFloat(FillId, fill);
         }
 
-        public void ConfigureFlow(Vector3 startWorld, Vector3 endWorld)
+        public void ConfigureFlow([Bridge.Ref] Vector3 startWorld, [Bridge.Ref] Vector3 endWorld)
         {
             flowStartWorld = startWorld;
             flowEndWorld = endWorld;
@@ -138,7 +138,7 @@ namespace FactoryPipePower
             ApplyFlowToRuntimeMaterial();
         }
 
-        public void ConfigureCornerFlow(Vector3 startWorld, Vector3 cornerWorld, Vector3 endWorld)
+        public void ConfigureCornerFlow([Bridge.Ref] Vector3 startWorld, [Bridge.Ref] Vector3 cornerWorld, [Bridge.Ref] Vector3 endWorld)
         {
             flowStartWorld = startWorld;
             flowEndWorld = endWorld;

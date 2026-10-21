@@ -1,5 +1,7 @@
 using UnityEngine;
+#if !UNITY_LUNA
 using UnityEngine.InputSystem;
+#endif
 
 namespace FactoryPipePower
 {
@@ -11,14 +13,18 @@ namespace FactoryPipePower
         const string PressActionName = "PointerPress";
 
         [SerializeField] Camera raycastCamera;
+#if !UNITY_LUNA
         [SerializeField] InputActionAsset inputActions;
+#endif
         [SerializeField] float maxRayDistance = 100f;
         [SerializeField] LayerMask pickMask = ~0;
         [SerializeField] LayerMask slotTapMask = ~0;
         [SerializeField] MonoBehaviour tutorialGateBehaviour;
 
+#if !UNITY_LUNA
         InputAction pressAction;
         InputAction positionAction;
+#endif
         DraggablePipeController activePipe;
         bool inputBlocked;
         ITutorialInputGate tutorialGate;
@@ -58,6 +64,7 @@ namespace FactoryPipePower
             if (raycastCamera == null)
                 raycastCamera = Camera.main;
 
+#if !UNITY_LUNA
             if (inputActions == null)
             {
                 Debug.LogError($"[PointerInputController] inputActions is not assigned on '{name}'.", this);
@@ -79,10 +86,12 @@ namespace FactoryPipePower
             pressAction.canceled += OnPressCanceled;
             pressAction.Enable();
             positionAction.Enable();
+#endif
         }
 
         void OnDestroy()
         {
+#if !UNITY_LUNA
             if (pressAction != null)
             {
                 pressAction.started -= OnPressStarted;
@@ -92,12 +101,21 @@ namespace FactoryPipePower
 
             if (positionAction != null)
                 positionAction.Disable();
+#endif
 
             ReleaseActivePipe();
         }
 
         void Update()
         {
+#if UNITY_LUNA
+            if (Input.GetMouseButtonDown(0))
+                HandlePressStarted(CurrentPointerPosition());
+
+            if (Input.GetMouseButtonUp(0))
+                HandlePressCanceled();
+#endif
+
             if (activePipe == null)
                 return;
 
@@ -107,11 +125,23 @@ namespace FactoryPipePower
                 return;
             }
 
-            if (activePipe.State == DraggablePipeState.Dragging && positionAction != null)
-                activePipe.UpdateDrag(positionAction.ReadValue<Vector2>(), raycastCamera);
+            if (activePipe.State == DraggablePipeState.Dragging && HasPointerPosition())
+                activePipe.UpdateDrag(CurrentPointerPosition(), raycastCamera);
         }
 
+#if !UNITY_LUNA
         void OnPressStarted(InputAction.CallbackContext context)
+        {
+            HandlePressStarted(positionAction.ReadValue<Vector2>());
+        }
+
+        void OnPressCanceled(InputAction.CallbackContext context)
+        {
+            HandlePressCanceled();
+        }
+#endif
+
+        void HandlePressStarted(Vector2 screenPosition)
         {
             if (inputBlocked)
                 return;
@@ -120,7 +150,6 @@ namespace FactoryPipePower
             if (raycastCamera == null)
                 return;
 
-            Vector2 screenPosition = positionAction.ReadValue<Vector2>();
             ITutorialInputGate gate = ResolveTutorialGate();
 
             if (gate != null && gate.TryConsumeAdvancePress(screenPosition))
@@ -151,7 +180,7 @@ namespace FactoryPipePower
             }
         }
 
-        void OnPressCanceled(InputAction.CallbackContext context)
+        void HandlePressCanceled()
         {
             if (activePipe == null)
                 return;
@@ -160,6 +189,24 @@ namespace FactoryPipePower
                 activePipe.EndDragWithoutPlacement();
 
             ReleaseActivePipe();
+        }
+
+        Vector2 CurrentPointerPosition()
+        {
+#if UNITY_LUNA
+            return Input.mousePosition;
+#else
+            return positionAction != null ? positionAction.ReadValue<Vector2>() : Vector2.zero;
+#endif
+        }
+
+        bool HasPointerPosition()
+        {
+#if UNITY_LUNA
+            return true;
+#else
+            return positionAction != null;
+#endif
         }
 
         void OnActivePipeCommitted(DraggablePipeController pipe)

@@ -119,8 +119,8 @@ namespace FactoryPipePower
 
         public static bool TryGetStraightEndByPosition(
             int currentYawQuarterDegrees,
-            Vector3 currentPosition,
-            Vector3 neighbourPosition,
+[Bridge.Ref]             Vector3 currentPosition,
+[Bridge.Ref]             Vector3 neighbourPosition,
             out int endDegrees)
         {
             endDegrees = 0;
@@ -143,8 +143,8 @@ namespace FactoryPipePower
             PipeShape neighbourShape,
             int neighbourYawQuarterDegrees,
             int currentYawQuarterDegrees,
-            Vector3 currentPosition,
-            Vector3 neighbourPosition,
+[Bridge.Ref]             Vector3 currentPosition,
+[Bridge.Ref]             Vector3 neighbourPosition,
             out int consumedEndDegrees)
         {
             consumedEndDegrees = 0;
@@ -172,13 +172,13 @@ namespace FactoryPipePower
         public static bool AreSegmentLinksDistinct(
             PipeShape previousShape,
             int previousYawQuarterDegrees,
-            Vector3 previousPosition,
+[Bridge.Ref]             Vector3 previousPosition,
             PipeShape currentShape,
             int currentYawQuarterDegrees,
-            Vector3 currentPosition,
+[Bridge.Ref]             Vector3 currentPosition,
             PipeShape nextShape,
             int nextYawQuarterDegrees,
-            Vector3 nextPosition)
+[Bridge.Ref]             Vector3 nextPosition)
         {
             if (currentShape != PipeShape.Straight)
                 return true;

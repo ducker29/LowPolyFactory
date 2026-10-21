@@ -1,0 +1,392 @@
+{
+    "BuildID": "54c4beca-4c36-4e46-9c88-39617a08a23a",
+    "Command": "project:build",
+    "ProjectID": "4e41c565f08317d49bb83a734b232d47",
+    "ProjectStateHash": "afa01b8ded12dd7f7c251233ba480be6fd674409bdefaec6c72d1db5e1e60dfb",
+    "StageCompletedAt": 3,
+    "EarliestFatalError": 0,
+    "StartTime": 1792620137392,
+    "EndTime": 1792620252283,
+    "PlaygroundUserID": 41950,
+    "OperatingSystem": "win32",
+    "UnityPackageID": null,
+    "TargetPlatform": "develop",
+    "UnityVersion": "6000.0.84f1",
+    "LunaVersion": "7.2.0",
+    "LogCount": 15,
+    "Logs": [
+        {
+            "LogID": "f70675b2-449a-434c-81d7-1a251a981125",
+            "Order": 12,
+            "Timestamp": 1792620252538,
+            "Stage": 3,
+            "ErrorType": 1,
+            "ErrorCode": "LP3006",
+            "Description": "You are not using the Luna API: Playable.InstallFullGame",
+            "Details": [
+                "You are not using the Luna API: Playable.InstallFullGame. Some ad networks require these calls. Please add these calls to ensure your playable works on all ad networks. Check documentation for more information."
+            ],
+            "DescriptionValues": [
+                "Playable",
+                "InstallFullGame"
+            ],
+            "DetailsValues": [
+                "Playable",
+                "InstallFullGame"
+            ],
+            "LogCount": 1,
+            "LinePosition": null,
+            "FilePath": "",
+            "ClassName": "",
+            "MemberName": "",
+            "Severity": 0
+        },
+        {
+            "LogID": "56c59d66-7e0c-475d-916c-9f8cdfe0e8b9",
+            "Order": 12,
+            "Timestamp": 1792620252538,
+            "Stage": 3,
+            "ErrorType": 1,
+            "ErrorCode": "LP3015",
+            "Description": "You are not the Game Ended API: LifeCycle.GameEnded",
+            "Details": [
+                "You are not using the Game Ended API: LifeCycle.GameEnded. Some ad networks require this call, please add the event to avoid the ad being rejected."
+            ],
+            "DescriptionValues": [
+                "LifeCycle",
+                "GameEnded"
+            ],
+            "DetailsValues": [
+                "LifeCycle",
+                "GameEnded"
+            ],
+            "LogCount": 1,
+            "LinePosition": null,
+            "FilePath": "",
+            "ClassName": "",
+            "MemberName": "",
+            "Severity": 0
+        },
+        {
+            "LogID": "befa96cb-6ab6-421f-a302-e9e98b6cd4da",
+            "Order": 12,
+            "Timestamp": 1792620252539,
+            "Stage": 3,
+            "ErrorType": 3,
+            "ErrorCode": "LP3007",
+            "Description": "You are not using any custom events",
+            "Details": [
+                "You are not using any custom events. It is recommended to use custom events to have a better understanding of the playable."
+            ],
+            "DescriptionValues": [
+                ""
+            ],
+            "DetailsValues": [
+                ""
+            ],
+            "LogCount": 1,
+            "LinePosition": null,
+            "FilePath": "",
+            "ClassName": "",
+            "MemberName": "",
+            "Severity": 0
+        },
+        {
+            "LogID": "9c96a90d-16a3-4612-99e6-58329f742bdd",
+            "Order": 12,
+            "Timestamp": 1792620252539,
+            "Stage": 3,
+            "ErrorType": 3,
+            "ErrorCode": "LP3011",
+            "Description": "You are not using any LunaPlaygroundFields attributes.",
+            "Details": [
+                "You are not using any LunaPlaygroundFields attributes, it allows you to configure your playable to different concepts to find the best variation, which can drastically improve playable performance on all ad networks."
+            ],
+            "DescriptionValues": null,
+            "DetailsValues": null,
+            "LogCount": 1,
+            "LinePosition": null,
+            "FilePath": "",
+            "ClassName": "",
+            "MemberName": "",
+            "Severity": 0
+        },
+        {
+            "LogID": "db2aeeb6-ee34-4e7b-bbd0-2cf86b6070e8",
+            "Order": 0,
+            "Timestamp": 1792620148182,
+            "Stage": 1,
+            "ErrorType": 2,
+            "ErrorCode": "LP1001",
+            "Description": "Update shader stripping settings",
+            "Details": [
+                "Some of the scenes appear to have fog enabled and / or lightmapping data. Please modify 'Shader stripping' settings to always include required shader variants."
+            ],
+            "DescriptionValues": [],
+            "DetailsValues": [],
+            "LogCount": 1,
+            "LinePosition": 0,
+            "FilePath": "",
+            "ClassName": "",
+            "MemberName": "",
+            "Severity": 0
+        },
+        {
+            "LogID": "df4b8ae7-1b49-4a29-a281-b17448f93c82",
+            "Order": 1,
+            "Timestamp": 1792620150086,
+            "Stage": 1,
+            "ErrorType": 3,
+            "ErrorCode": "LP1040",
+            "Description": "URP ScreenSpaceAmbientOcclusion (SSAO) is active in URP UniversalRenderData.",
+            "Details": [
+                "The Unity Playworks Plugin doesn't directly support Unity's built-in SSAO. If you enable this effect in Unity, it will not appear in your final build. To use SSAO, you can enable it directly in Dev Environment or Creative Editor on Unity Playworks."
+            ],
+            "DescriptionValues": [],
+            "DetailsValues": [
+                "ScreenSpaceAmbientOcclusion"
+            ],
+            "LogCount": 1,
+            "LinePosition": 0,
+            "FilePath": "",
+            "ClassName": "",
+            "MemberName": "",
+            "Severity": 0
+        },
+        {
+            "LogID": "b4a86ef5-9456-4202-b397-e2977f873863",
+            "Order": 2,
+            "Timestamp": 1792620201376,
+            "Stage": 1,
+            "ErrorType": 2,
+            "ErrorCode": "LP1007",
+            "Description": "Extensive use of mesh colliders",
+            "Details": [
+                "Usage of mesh colliders has negative effect on performance. You can use primitive colliders instead."
+            ],
+            "DescriptionValues": [],
+            "DetailsValues": [],
+            "LogCount": 1,
+            "LinePosition": 0,
+            "FilePath": "",
+            "ClassName": "",
+            "MemberName": "",
+            "Severity": 0
+        },
+        {
+            "LogID": "5f606259-31de-40af-8fdc-b5328aa7ba7b",
+            "Order": 3,
+            "Timestamp": 1792620201377,
+            "Stage": 1,
+            "ErrorType": 2,
+            "ErrorCode": "LP1014",
+            "Description": "We recommend running Runtime Analysis to find and remove all unused code",
+            "Details": [
+                "Navigate to the Runtime Analysis → Code tab to enable code stripping. Before uploading the playable, please make sure to have played all scenario’s of the playable in a development build to make Runtime Analysis work properly."
+            ],
+            "DescriptionValues": [],
+            "DetailsValues": [],
+            "LogCount": 1,
+            "LinePosition": 0,
+            "FilePath": "",
+            "ClassName": "",
+            "MemberName": "",
+            "Severity": 0
+        },
+        {
+            "LogID": "0b787daf-d0e6-497d-8b6b-04982ef989a3",
+            "Order": 4,
+            "Timestamp": 1792620201377,
+            "Stage": 1,
+            "ErrorType": 2,
+            "ErrorCode": "LP1031",
+            "Description": "We recommend running Runtime Analysis to find and remove all unused shader variants",
+            "Details": [
+                "You have 16 shaders and 222 shader variants in your scene, this can be detrimental to the loading times and size of your playable.\n\nRuntime Analysis has only found 26 shader variants in use within your playable. Navigate to the Runtime Analysis > Shaders tab to enable shader stripping to help reduce the amount of shaders, and shader variants present in your playable"
+            ],
+            "DescriptionValues": [],
+            "DetailsValues": [
+                "16",
+                "222",
+                "26"
+            ],
+            "LogCount": 1,
+            "LinePosition": 0,
+            "FilePath": "",
+            "ClassName": "",
+            "MemberName": "",
+            "Severity": 0
+        },
+        {
+            "LogID": "816852d6-e646-4699-bbf3-dcb564e165e4",
+            "Order": 5,
+            "Timestamp": 1792620201377,
+            "Stage": 1,
+            "ErrorType": 2,
+            "ErrorCode": "LP1016",
+            "Description": "Extensive usage of ParticleSystem Component",
+            "Details": [
+                "There is extensive usage of the ParticleSystem component.\nExcessive usage of any component can be detrimental to performance on lower and in some cases higher end devices, consider reducing the amount the component is used.\nRecommended count: 10, current count 23."
+            ],
+            "DescriptionValues": [
+                "ParticleSystem"
+            ],
+            "DetailsValues": [
+                "ParticleSystem",
+                "10",
+                "23"
+            ],
+            "LogCount": 1,
+            "LinePosition": 0,
+            "FilePath": "",
+            "ClassName": "",
+            "MemberName": "",
+            "Severity": 0
+        },
+        {
+            "LogID": "8b68ed81-fab7-4f9d-b614-e7c462dc6b5f",
+            "Order": 6,
+            "Timestamp": 1792620201378,
+            "Stage": 1,
+            "ErrorType": 2,
+            "ErrorCode": "LP1022",
+            "Description": "Extensive use of shader variants",
+            "Details": [
+                "Extensive usage of shader variants negatively affects playable startup time. Please consider them to be less than 20 (22 found). Check Runtime analysis -> shader tab to see used shaders."
+            ],
+            "DescriptionValues": [],
+            "DetailsValues": [
+                "20",
+                "22"
+            ],
+            "LogCount": 1,
+            "LinePosition": 0,
+            "FilePath": "",
+            "ClassName": "",
+            "MemberName": "",
+            "Severity": 0
+        },
+        {
+            "LogID": "e4002f51-a09b-4e3f-b053-8c2a50ea06c1",
+            "Order": 7,
+            "Timestamp": 1792620201378,
+            "Stage": 1,
+            "ErrorType": 2,
+            "ErrorCode": "LP1024",
+            "Description": "Huge RAM usage",
+            "Details": [
+                "Playable have huge RAM usage (310,15 MB). Recommended RAM value is lower than 256,00 MB to support low-end devices"
+            ],
+            "DescriptionValues": [],
+            "DetailsValues": [
+                "256,00",
+                "310,15"
+            ],
+            "LogCount": 1,
+            "LinePosition": 0,
+            "FilePath": "",
+            "ClassName": "",
+            "MemberName": "",
+            "Severity": 0
+        },
+        {
+            "LogID": "3c36cbec-506f-4310-8734-5b430a094c2b",
+            "Order": 8,
+            "Timestamp": 1792620201383,
+            "Stage": 1,
+            "ErrorType": 0,
+            "ErrorCode": "LP1032",
+            "Description": "Package(s) is not supported in Luna",
+            "Details": [
+                "Currently package(s) com.unity.timeline are not supported in Luna. We recommend you to remove it and workaround it's functionality."
+            ],
+            "DescriptionValues": [
+                "com.unity.timeline (1.8.13)"
+            ],
+            "DetailsValues": [
+                "com.unity.timeline"
+            ],
+            "LogCount": 1,
+            "LinePosition": 0,
+            "FilePath": "E:/UnityProjects/LowPolyFactory/Packages\\manifest.json",
+            "ClassName": "",
+            "MemberName": "",
+            "Severity": 0
+        },
+        {
+            "LogID": "b27533a2-e682-449d-b6ec-e7cbcc5996e7",
+            "Order": 9,
+            "Timestamp": 1792620201383,
+            "Stage": 1,
+            "ErrorType": 3,
+            "ErrorCode": "LP1002",
+            "Description": "Repeat wrap mode used on a texture with non power-of-two dimensions, this might not be rendered correctly.",
+            "Details": [
+                "Repeat wrap mode used on 'LiberationSans SDF Atlas' texture at 'Assets/UnityTechnologies/ParticlePack/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset' with non power-of-two dimensions, this might not be rendered correctly."
+            ],
+            "DescriptionValues": [],
+            "DetailsValues": [
+                "LiberationSans SDF Atlas",
+                "Assets/UnityTechnologies/ParticlePack/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset"
+            ],
+            "LogCount": 1,
+            "LinePosition": 0,
+            "FilePath": "Assets/UnityTechnologies/ParticlePack/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset",
+            "ClassName": "",
+            "MemberName": "",
+            "Severity": 0
+        },
+        {
+            "LogID": "199d4510-1b0e-46d3-b79c-582a6fe28949",
+            "Order": 10,
+            "Timestamp": 1792620201383,
+            "Stage": 1,
+            "ErrorType": 2,
+            "ErrorCode": "LP1010",
+            "Description": "Looks like a collider was scaled, this might affect performance.",
+            "Details": [
+                "SM_Factory_Tree_34",
+                "SM_Factory_Tree_12",
+                "SM_Factory_Cooling_tower2",
+                "SM_Factory_Tree_15",
+                "SM_Factory_Tree_02",
+                "SM_Factory_Tree_9",
+                "SM_Factory_Tree_4",
+                "SM_Factory_Tank_45",
+                "SM_Factory_Tree_13",
+                "SM_Factory_Tank_45 (1)",
+                "SM_Factory_Tank_45 (2)",
+                "SM_Factory_Warehouse_10 (2)",
+                "SM_Factory_Warehouse_4 (2)",
+                "SM_Factory_Warehouse_10 (1)",
+                "SM_Factory_Warehouse_4 (1)",
+                "SM_Factory_Road_236 (1)",
+                "SM_Factory_Tree_8",
+                "SM_Factory_Tree_6",
+                "SM_Factory_Warehouse_01",
+                "SM_Factory_Tree_2",
+                "SM_Factory_Tree_04",
+                "SM_Factory_Tree_03",
+                "SM_Factory_Warehouse_10",
+                "SM_Factory_Warehouse_4",
+                "SM_Factory_Tree_14",
+                "SM_Factory_Tree_10",
+                "SM_Factory_Tree_17",
+                "SM_Factory_Cooling_tower",
+                "SM_Factory_Tree_34",
+                "SM_Factory_Tree_11",
+                "SM_Factory_Tree_3",
+                "SM_Factory_Tree_7",
+                "SM_Factory_Road_236"
+            ],
+            "DescriptionValues": [],
+            "DetailsValues": [],
+            "LogCount": 33,
+            "LinePosition": 0,
+            "FilePath": "",
+            "ClassName": "",
+            "MemberName": "",
+            "Severity": 0
+        }
+    ]
+}

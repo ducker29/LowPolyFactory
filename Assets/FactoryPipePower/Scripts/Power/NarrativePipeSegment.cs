@@ -26,7 +26,7 @@ namespace FactoryPipePower
             if (completionSparks != null)
             {
                 completionSparks.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-                completionSparks.Clear(true);
+                completionSparks.Clear();
             }
 
             if (visual != null)
@@ -70,7 +70,7 @@ namespace FactoryPipePower
             if (completionSparks == null)
                 return;
 
-            completionSparks.Clear(true);
+            completionSparks.Clear();
             completionSparks.Play(true);
         }
 
