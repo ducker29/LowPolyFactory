@@ -1,0 +1,82 @@
+using System;
+using UnityEngine;
+
+namespace FactoryPipePower
+{
+    [DisallowMultipleComponent]
+    public class EndPowerNode : MonoBehaviour, IPowerNode
+    {
+        [SerializeField] MonoBehaviour expectedPreviousBehaviour;
+        [SerializeField] Transform powerInput;
+        [SerializeField] PipeVisualController visual;
+        [SerializeField] Material inactiveMaterial;
+        [SerializeField] Material poweredMaterial;
+        [SerializeField] FactoryPowerController factoryPowerController;
+        [SerializeField] NarrativePowerSequence narrativePowerSequence;
+
+        IPowerNode expectedPrevious;
+        EndPowerState state = EndPowerState.Inactive;
+        int activationCount;
+
+        public bool IsPowered => state == EndPowerState.Powered;
+        public Transform PowerOutput => powerInput != null ? powerInput : transform;
+        public EndPowerState State => state;
+        public int ActivationCount => activationCount;
+
+        public event Action<EndPowerNode> Powered;
+
+        void Awake()
+        {
+            if (expectedPrevious == null)
+                expectedPrevious = expectedPreviousBehaviour as IPowerNode;
+        }
+
+        public void SetExpectedPrevious(IPowerNode previous)
+        {
+            expectedPrevious = previous;
+        }
+
+        public void Initialize()
+        {
+            state = EndPowerState.Inactive;
+            activationCount = 0;
+
+            if (visual != null)
+            {
+                if (inactiveMaterial != null)
+                    visual.SetBaseMaterial(inactiveMaterial);
+                else
+                    visual.ResetVisual();
+            }
+        }
+
+        public void NotifyPreviousPowered(IPowerNode previous)
+        {
+            if (state == EndPowerState.Powered)
+                return;
+            if (previous == null || expectedPrevious == null || previous != expectedPrevious)
+                return;
+
+            activationCount++;
+            state = EndPowerState.Powered;
+
+            if (visual != null)
+            {
+                if (poweredMaterial != null)
+                    visual.SetBaseMaterial(poweredMaterial);
+                else
+                {
+                    visual.UseGreenRuntimeMaterial();
+                    visual.SetFill(1f);
+                }
+            }
+
+            Powered?.Invoke(this);
+
+            if (narrativePowerSequence != null)
+                narrativePowerSequence.OnEndPowered();
+            else
+                factoryPowerController?.SetOnline();
+        }
+    }
+}

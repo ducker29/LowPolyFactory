@@ -62,8 +62,6 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -85,11 +83,9 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &4866364826980069749
 MonoBehaviour:
@@ -106,6 +102,8 @@ MonoBehaviour:
   visualRenderer: {fileID: 6382274078127652356}
   tutorialOverlayMaterial: {fileID: 2100000, guid: dc607c903d489eb4d9692789ff566b17, type: 2}
   greenFillTemplate: {fileID: 2100000, guid: e2bd03655091f494ea67fedaac72eee9, type: 2}
+  overrideFillDefaultColor: 0
+  fillDefaultColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &2368983286633791737
 GameObject:
   m_ObjectHideFlags: 0
@@ -117,7 +115,7 @@ GameObject:
   - component: {fileID: 7764224272417654082}
   - component: {fileID: 8332885720112836396}
   m_Layer: 8
-  m_Name: DragCollider
+  m_Name: PickCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -159,6 +157,59 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.44330335, y: 0.4433038, z: 2}
   m_Center: {x: 0.0000065118074, y: 0.000000029802322, z: 1.0000005}
+--- !u!1 &6153045689834323344
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2623626291772419128}
+  - component: {fileID: 5619013359710250227}
+  m_Layer: 8
+  m_Name: DragCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2623626291772419128
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6153045689834323344}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2881477146691383004}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &5619013359710250227
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6153045689834323344}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 0.44330335, y: 0.4433038, z: 2}
+  m_Center: {x: 0.0000065118074, y: 0.000000029802322, z: 1.0000005}
 --- !u!1 &6162838472710505013
 GameObject:
   m_ObjectHideFlags: 0
@@ -192,6 +243,7 @@ Transform:
   m_Children:
   - {fileID: 5380531123204523478}
   - {fileID: 7764224272417654082}
+  - {fileID: 2623626291772419128}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &6877160452373639631
@@ -201,10 +253,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6162838472710505013}
-  serializedVersion: 5
+  serializedVersion: 4
   m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_Drag: 0
+  m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -236,9 +288,12 @@ MonoBehaviour:
   spec:
     diameter: 0
     length: 2
+    shape: 0
   visual: {fileID: 4866364826980069749}
-  dragCollider: {fileID: 8332885720112836396}
+  pickCollider: {fileID: 8332885720112836396}
+  dragCollider: {fileID: 5619013359710250227}
   body: {fileID: 6877160452373639631}
   defaultMaterial: {fileID: 2100000, guid: fa24142097504e94694f814d32af193d, type: 2}
   returnDuration: 0.25
   dragPlaneHeight: 1
+  obstacleSkin: 0.02

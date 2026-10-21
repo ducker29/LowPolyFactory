@@ -188,9 +188,12 @@ namespace FactoryPipePower.PlayModeTests
             Assert.IsNotNull(pipe);
             Assert.AreEqual(DraggablePipeState.Stock, pipe.State);
             Assert.IsTrue(pipe.IsInteractable);
-            var col = go.GetComponentInChildren<BoxCollider>(true);
+            var col = go.transform.Find("PickCollider").GetComponent<BoxCollider>();
             Assert.IsNotNull(col);
-            Assert.IsTrue(col.enabled, "collider must be enabled in Stock");
+            Assert.IsTrue(col.enabled, "PickCollider must be enabled in Stock");
+            var dragCol = go.transform.Find("DragCollider").GetComponent<BoxCollider>();
+            Assert.IsNotNull(dragCol);
+            Assert.IsFalse(dragCol.enabled, "DragCollider must be disabled in Stock");
             Assert.IsTrue(go.activeInHierarchy);
             yield return null;
             Assert.AreEqual(DraggablePipeState.Stock, pipe.State);
@@ -209,6 +212,10 @@ namespace FactoryPipePower.PlayModeTests
 
             Assert.AreEqual(DraggablePipeState.Dragging, pipe.State);
             Assert.IsFalse(pipe.IsInteractable);
+            var pick = go.transform.Find("PickCollider").GetComponent<BoxCollider>();
+            var drag = go.transform.Find("DragCollider").GetComponent<BoxCollider>();
+            Assert.IsFalse(pick.enabled, "PickCollider must be disabled while Dragging");
+            Assert.IsTrue(drag.enabled, "DragCollider must be enabled while Dragging");
             Assert.AreEqual(pos0, go.transform.position, "BeginDrag must not move the pipe");
             Assert.Less(Quaternion.Angle(rot0, go.transform.rotation), 0.01f,
                 "BeginDrag must not change rotation");
@@ -257,7 +264,7 @@ namespace FactoryPipePower.PlayModeTests
         {
             var go = Spawn(SmallPrefabPath, new Vector3(0f, 1f, -6f), 45f);
             var pipe = go.GetComponent<DraggablePipeController>();
-            var col = go.GetComponentInChildren<BoxCollider>(true);
+            var col = go.transform.Find("PickCollider").GetComponent<BoxCollider>();
             var stockPos = go.transform.position;
             var stockRot = go.transform.rotation;
 
@@ -285,7 +292,9 @@ namespace FactoryPipePower.PlayModeTests
                 "pipe must settle at the exact stockPosition");
             Assert.Less(Quaternion.Angle(stockRot, go.transform.rotation), 0.01f,
                 "pipe must settle at the exact stockRotation");
-            Assert.IsTrue(col.enabled, "collider must be re-enabled in Stock");
+            Assert.IsTrue(col.enabled, "PickCollider must be re-enabled in Stock");
+            Assert.IsFalse(go.transform.Find("DragCollider").GetComponent<BoxCollider>().enabled,
+                "DragCollider must stay disabled in Stock");
             Assert.IsTrue(pipe.IsInteractable);
             Assert.IsTrue(go.activeInHierarchy);
         }
@@ -296,7 +305,7 @@ namespace FactoryPipePower.PlayModeTests
         {
             var go = Spawn(SmallPrefabPath, new Vector3(0f, 1f, -6f), 30f);
             var pipe = go.GetComponent<DraggablePipeController>();
-            var col = go.GetComponentInChildren<BoxCollider>(true);
+            var col = go.transform.Find("PickCollider").GetComponent<BoxCollider>();
             var visual = go.transform.Find("Visual");
             var pvc = visual.GetComponent<PipeVisualController>();
             pvc.SetTutorialOverlay(true);
@@ -397,7 +406,7 @@ namespace FactoryPipePower.PlayModeTests
             var input = CreateInputHarness();
             var go = Spawn(SmallPrefabPath, new Vector3(0f, 1f, -6f), 30f);
             var pipe = go.GetComponent<DraggablePipeController>();
-            var col = go.GetComponentInChildren<BoxCollider>(true);
+            var col = go.transform.Find("PickCollider").GetComponent<BoxCollider>();
             var stockPos = go.transform.position;
             var stockRot = go.transform.rotation;
             Physics.SyncTransforms();
@@ -444,7 +453,7 @@ namespace FactoryPipePower.PlayModeTests
             var input = CreateInputHarness();
             var go = Spawn(SmallPrefabPath, new Vector3(0f, 1f, -6f), 30f);
             var pipe = go.GetComponent<DraggablePipeController>();
-            var col = go.GetComponentInChildren<BoxCollider>(true);
+            var col = go.transform.Find("PickCollider").GetComponent<BoxCollider>();
             var visual = go.transform.Find("Visual");
             var screen = cam.WorldToScreenPoint(go.transform.position);
             Physics.SyncTransforms();
@@ -481,8 +490,8 @@ namespace FactoryPipePower.PlayModeTests
             var childNames = new List<string>();
             foreach (Transform child in prefab.transform)
                 childNames.Add(child.name);
-            CollectionAssert.AreEquivalent(new[] { "Visual", "DragCollider" }, childNames,
-                "root must contain exactly Visual and DragCollider children");
+            CollectionAssert.AreEquivalent(new[] { "Visual", "PickCollider", "DragCollider" }, childNames,
+                "root must contain exactly Visual, PickCollider and DragCollider children");
 
             var visual = prefab.transform.Find("Visual");
             var mf = visual.GetComponent<MeshFilter>();
@@ -497,17 +506,30 @@ namespace FactoryPipePower.PlayModeTests
                 "Visual must have PipeVisualController");
             Assert.IsTrue(visual.gameObject.activeSelf, "Visual child must be active in prefab");
 
-            var colliderTransform = prefab.transform.Find("DragCollider");
-            var bc = colliderTransform.GetComponent<BoxCollider>();
-            Assert.IsNotNull(bc, "DragCollider must have BoxCollider");
+            var pickTransform = prefab.transform.Find("PickCollider");
+            Assert.IsNotNull(pickTransform, "PickCollider child must exist");
+            var bc = pickTransform.GetComponent<BoxCollider>();
+            Assert.IsNotNull(bc, "PickCollider must have BoxCollider");
             Assert.IsFalse(bc.isTrigger);
-            Assert.IsTrue(bc.enabled, "collider must be enabled in prefab (Stock)");
+            Assert.IsTrue(bc.enabled, "PickCollider must be enabled in prefab (Stock)");
             Assert.Less((bc.center - mf.sharedMesh.bounds.center).magnitude, 1e-3f,
                 "collider center must follow mesh bounds (pivot at pipe end, axis Z)");
             Assert.Less((bc.size - mf.sharedMesh.bounds.size).magnitude, 1e-3f,
                 "collider size must follow mesh bounds");
             Assert.Greater(bc.size.z, bc.size.x,
                 "longitudinal pipe axis must be Z");
+
+            var dragTransform = prefab.transform.Find("DragCollider");
+            Assert.IsNotNull(dragTransform, "DragCollider child must exist");
+            var dragBc = dragTransform.GetComponent<BoxCollider>();
+            Assert.IsNotNull(dragBc, "DragCollider must have BoxCollider");
+            Assert.IsFalse(dragBc.isTrigger);
+            Assert.IsFalse(dragBc.enabled, "DragCollider must be disabled in prefab (Stock)");
+            Assert.AreNotSame(bc, dragBc, "PickCollider and DragCollider must be different components");
+            Assert.Less((dragBc.center - bc.center).magnitude, 1e-5f,
+                "DragCollider center must match PickCollider");
+            Assert.Less((dragBc.size - bc.size).magnitude, 1e-5f,
+                "DragCollider size must match PickCollider");
 
             var rb = prefab.GetComponent<Rigidbody>();
             Assert.IsNotNull(rb, "root must have Rigidbody");
@@ -527,6 +549,7 @@ namespace FactoryPipePower.PlayModeTests
             Assert.AreEqual(1f, so.FindProperty("dragPlaneHeight").floatValue, 1e-5f,
                 "dragPlaneHeight default must be 1.0");
             Assert.IsNotNull(so.FindProperty("visual").objectReferenceValue, "visual reference must be assigned");
+            Assert.IsNotNull(so.FindProperty("pickCollider").objectReferenceValue, "pickCollider reference must be assigned");
             Assert.IsNotNull(so.FindProperty("dragCollider").objectReferenceValue, "dragCollider reference must be assigned");
             Assert.IsNotNull(so.FindProperty("body").objectReferenceValue, "body reference must be assigned");
             Assert.IsNotNull(so.FindProperty("defaultMaterial").objectReferenceValue,

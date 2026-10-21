@@ -102,6 +102,61 @@ MonoBehaviour:
   visualRenderer: {fileID: 7592456142371082789}
   tutorialOverlayMaterial: {fileID: 2100000, guid: dc607c903d489eb4d9692789ff566b17, type: 2}
   greenFillTemplate: {fileID: 2100000, guid: e2bd03655091f494ea67fedaac72eee9, type: 2}
+  overrideFillDefaultColor: 0
+  fillDefaultColor: {r: 1, g: 1, b: 1, a: 1}
+--- !u!1 &3232228610646505329
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2674265197864113807}
+  - component: {fileID: 2646294754503665431}
+  m_Layer: 8
+  m_Name: DragCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2674265197864113807
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3232228610646505329}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1513334607665308806}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &2646294754503665431
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3232228610646505329}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 1.3213916, y: 0.44371632, z: 1.3150415}
+  m_Center: {x: -0.005471587, y: 0, z: 0.00030052662}
 --- !u!1 &7390430114671992837
 GameObject:
   m_ObjectHideFlags: 0
@@ -113,7 +168,7 @@ GameObject:
   - component: {fileID: 7265894213672892040}
   - component: {fileID: 2006235318852731027}
   m_Layer: 8
-  m_Name: DragColliderA
+  m_Name: PickCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -188,6 +243,7 @@ Transform:
   m_Children:
   - {fileID: 8247361875171772749}
   - {fileID: 7265894213672892040}
+  - {fileID: 2674265197864113807}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &2340654559332177043
@@ -234,8 +290,10 @@ MonoBehaviour:
     length: 2
     shape: 1
   visual: {fileID: 6676665182403363651}
-  dragCollider: {fileID: 2006235318852731027}
+  pickCollider: {fileID: 2006235318852731027}
+  dragCollider: {fileID: 2646294754503665431}
   body: {fileID: 2340654559332177043}
   defaultMaterial: {fileID: 2100000, guid: fa24142097504e94694f814d32af193d, type: 2}
   returnDuration: 0.25
   dragPlaneHeight: 1
+  obstacleSkin: 0.02

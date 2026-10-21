@@ -57,6 +57,8 @@ namespace FactoryPipePower
         [SerializeField] Text messageText;
         [SerializeField] Image handImage;
         [SerializeField] RectTransform handMessageGroup;
+        [SerializeField] Image messageBackdrop;
+        [SerializeField] float backdropPadding = 10f;
         [SerializeField] Vector2 handAnchorOffset = new Vector2(0f, 0f);
         [SerializeField] float textUnderHandOffset = 30f;
         [SerializeField] float textCenterScreenOffset = 50f;
@@ -97,6 +99,9 @@ namespace FactoryPipePower
 
             if (handImage != null)
                 handImage.rectTransform.pivot = new Vector2(0f, 1f);
+
+            if (messageBackdrop != null)
+                messageBackdrop.gameObject.SetActive(false);
         }
 
         void OnDisable()
@@ -205,6 +210,11 @@ namespace FactoryPipePower
 
             if (previous != next)
                 PhaseChanged?.Invoke(next);
+        }
+
+        public void HideMessage()
+        {
+            ClearMessage();
         }
 
         public bool TryConsumeAdvancePress(Vector2 screenPosition)
@@ -799,12 +809,14 @@ namespace FactoryPipePower
             {
                 messageText.text = string.Empty;
                 messageText.gameObject.SetActive(false);
+                SetBackdropVisible(false);
                 return;
             }
 
             messageText.gameObject.SetActive(true);
             messageText.text = content;
             ApplyMessageLayout();
+            FitBackdropToText();
         }
 
         void ClearMessage()
@@ -814,6 +826,77 @@ namespace FactoryPipePower
 
             messageText.text = string.Empty;
             messageText.gameObject.SetActive(false);
+            SetBackdropVisible(false);
+        }
+
+        void SetBackdropVisible(bool visible)
+        {
+            if (messageBackdrop == null)
+                return;
+
+            messageBackdrop.gameObject.SetActive(visible);
+        }
+
+        void FitBackdropToText()
+        {
+            if (messageBackdrop == null || messageText == null)
+                return;
+
+            RectTransform textRect = messageText.rectTransform;
+            float wrapWidth = Mathf.Max(1f, textRect.rect.width);
+
+            var settings = messageText.GetGenerationSettings(new Vector2(wrapWidth, 0f));
+            var generator = messageText.cachedTextGenerator;
+            generator.Populate(messageText.text, settings);
+
+            float scaleFactor = Mathf.Max(0.0001f, settings.scaleFactor);
+
+            float contentWidth = 0f;
+            if (generator.characterCount > 0)
+            {
+                float minX = float.MaxValue;
+                float maxX = float.MinValue;
+                foreach (UICharInfo info in generator.characters)
+                {
+                    if (info.cursorPos.x < minX)
+                        minX = info.cursorPos.x;
+                    float right = info.cursorPos.x + info.charWidth;
+                    if (right > maxX)
+                        maxX = right;
+                }
+                contentWidth = (maxX - minX) / scaleFactor;
+            }
+
+            float contentHeight = 0f;
+            int lineCount = generator.lineCount;
+            if (lineCount > 0)
+            {
+                var lines = generator.lines;
+                contentHeight = (lines[0].topY - lines[lineCount - 1].topY + lines[lineCount - 1].height)
+                    / scaleFactor;
+            }
+
+            if (contentWidth <= 0f || contentHeight <= 0f)
+            {
+                SetBackdropVisible(false);
+                return;
+            }
+
+            float width = contentWidth + backdropPadding * 2f;
+            float height = contentHeight + backdropPadding * 2f;
+
+            RectTransform backdropRect = messageBackdrop.rectTransform;
+            int backdropIndex = backdropRect.GetSiblingIndex();
+            int textIndex = textRect.GetSiblingIndex();
+            if (backdropIndex > textIndex)
+                backdropRect.SetSiblingIndex(textIndex);
+            backdropRect.anchorMin = textRect.anchorMin;
+            backdropRect.anchorMax = textRect.anchorMax;
+            backdropRect.pivot = new Vector2(0.5f, 1f);
+            backdropRect.sizeDelta = new Vector2(width, height);
+            backdropRect.anchoredPosition = textRect.anchoredPosition + new Vector2(0f, backdropPadding);
+
+            SetBackdropVisible(true);
         }
 
         void ClearOverlays()

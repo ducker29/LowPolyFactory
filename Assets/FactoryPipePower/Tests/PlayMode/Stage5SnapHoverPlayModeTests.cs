@@ -160,8 +160,10 @@ namespace FactoryPipePower.PlayModeTests
             Assert.IsTrue(slot.IsAligned);
             Assert.AreEqual(DraggablePipeState.Placed, pipe.State,
                 "physics trigger snap must commit the pipe without an explicit TryAccept call");
-            var col = pipe.transform.Find("DragCollider").GetComponent<BoxCollider>();
-            Assert.IsFalse(col.enabled, "DragCollider must be disabled after auto-commit");
+            var dragCol = pipe.transform.Find("DragCollider").GetComponent<BoxCollider>();
+            Assert.IsFalse(dragCol.enabled, "DragCollider must be disabled after auto-commit");
+            var pickCol = pipe.transform.Find("PickCollider").GetComponent<BoxCollider>();
+            Assert.IsFalse(pickCol.enabled, "PickCollider must be disabled after auto-commit");
             var visual = pipe.transform.Find("Visual");
             Assert.IsFalse(visual.gameObject.activeSelf, "Visual must be hidden after auto-commit");
             Assert.IsTrue(pipe.gameObject.activeInHierarchy, "pipe root must stay active");

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace FactoryPipePower
 {
@@ -9,12 +10,15 @@ namespace FactoryPipePower
     {
         [SerializeField] PipeSpec spec;
         [SerializeField] PipeVisualController visual;
+        [SerializeField, FormerlySerializedAs("dragCollider")] Collider pickCollider;
         [SerializeField] Collider dragCollider;
         [SerializeField] Rigidbody body;
         [SerializeField] Material defaultMaterial;
         [SerializeField] float returnDuration = 0.25f;
         [SerializeField] float dragPlaneHeight = 1f;
+        [SerializeField] float obstacleSkin = 0.02f;
 
+        static int dragBlockMask;
         DraggablePipeState state = DraggablePipeState.Stock;
         Vector3 stockPosition;
         Quaternion stockRotation;
@@ -46,6 +50,7 @@ namespace FactoryPipePower
             dragTargetPosition = transform.position;
             returnPosition = transform.position;
             returnRotation = transform.rotation;
+            ApplyColliderState();
         }
 
         void OnDisable()
@@ -58,7 +63,7 @@ namespace FactoryPipePower
         {
             if (state == DraggablePipeState.Dragging)
             {
-                ApplyMovement(dragTargetPosition, stockRotation);
+                ApplyMovement(ClampToObstacles(dragTargetPosition), stockRotation);
             }
             else if (state == DraggablePipeState.Returning)
             {
@@ -87,7 +92,7 @@ namespace FactoryPipePower
             state = DraggablePipeState.Dragging;
             dragTargetPosition = transform.position;
 
-            SetDragCollidersEnabled(true);
+            ApplyColliderState();
 
             if (visual != null)
                 visual.SetTutorialOverlay(false);
@@ -118,7 +123,7 @@ namespace FactoryPipePower
 
             state = DraggablePipeState.Returning;
 
-            SetDragCollidersEnabled(false);
+            ApplyColliderState();
 
             returnStartPosition = transform.position;
             returnStartRotation = transform.rotation;
@@ -140,7 +145,7 @@ namespace FactoryPipePower
 
             state = DraggablePipeState.Placed;
 
-            SetDragCollidersEnabled(false);
+            ApplyColliderState();
 
             if (visual != null)
             {
@@ -176,16 +181,101 @@ namespace FactoryPipePower
                 body.rotation = stockRotation;
             }
 
-            SetDragCollidersEnabled(true);
+            ApplyColliderState();
 
             if (visual != null && defaultMaterial != null)
                 visual.SetBaseMaterial(defaultMaterial);
         }
 
-        void SetDragCollidersEnabled(bool value)
+        static int DragBlockMask
         {
+            get
+            {
+                if (dragBlockMask == 0)
+                    dragBlockMask = ~LayerMask.GetMask("DraggablePipe", "PipeSlot");
+
+                return dragBlockMask;
+            }
+        }
+
+        void ApplyColliderState()
+        {
+            if (pickCollider != null)
+                pickCollider.enabled = state == DraggablePipeState.Stock;
+
             if (dragCollider != null)
-                dragCollider.enabled = value;
+                dragCollider.enabled = state == DraggablePipeState.Dragging;
+        }
+
+        Vector3 ClampToObstacles(Vector3 desired)
+        {
+            if (dragCollider == null || !dragCollider.enabled)
+                return desired;
+
+            Vector3 position = transform.position;
+            Vector3 clamped = SweepClamp(position, desired, out RaycastHit hit, out bool startedInside);
+
+            if (startedInside)
+                return desired;
+
+            if (hit.collider == null)
+                return clamped;
+
+            Vector3 remaining = desired - clamped;
+            float into = Vector3.Dot(remaining, hit.normal);
+            if (into < 0f)
+                remaining -= hit.normal * into;
+
+            if (remaining.sqrMagnitude <= 1e-8f)
+                return clamped;
+
+            return SweepClamp(clamped, clamped + remaining, out _, out _);
+        }
+
+        Vector3 SweepClamp(Vector3 from, Vector3 desired, out RaycastHit hit, out bool startedInside)
+        {
+            hit = default;
+            startedInside = false;
+
+            Vector3 delta = desired - from;
+            float distance = delta.magnitude;
+            if (distance <= Mathf.Epsilon)
+                return from;
+
+            Vector3 direction = delta / distance;
+            GetDragBox(out Vector3 boxCenter, out Vector3 halfExtents);
+            boxCenter += from - transform.position;
+
+            if (!Physics.BoxCast(boxCenter, halfExtents, direction, out hit,
+                    dragCollider.transform.rotation, distance + obstacleSkin,
+                    DragBlockMask, QueryTriggerInteraction.Ignore))
+                return desired;
+
+            if (hit.distance > 0f)
+                return from + direction * Mathf.Max(0f, hit.distance - obstacleSkin);
+
+            startedInside = Physics.OverlapBox(boxCenter, halfExtents, dragCollider.transform.rotation,
+                DragBlockMask, QueryTriggerInteraction.Ignore).Length > 0;
+
+            return startedInside ? desired : from;
+        }
+
+        void GetDragBox(out Vector3 center, out Vector3 halfExtents)
+        {
+            if (dragCollider is BoxCollider box)
+            {
+                center = box.transform.TransformPoint(box.center);
+                Vector3 scale = box.transform.lossyScale;
+                halfExtents = 0.5f * new Vector3(
+                    box.size.x * Mathf.Abs(scale.x),
+                    box.size.y * Mathf.Abs(scale.y),
+                    box.size.z * Mathf.Abs(scale.z));
+                return;
+            }
+
+            Bounds bounds = dragCollider.bounds;
+            center = bounds.center;
+            halfExtents = bounds.extents;
         }
 
         void ApplyMovement(Vector3 position, Quaternion rotation)
