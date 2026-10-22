@@ -169,3 +169,5 @@ Packages/packages-lock.json linguist-generated
 
 # Exceptions for .asset files such as lightning pre-baking
 LightingData.asset     binary
+# Scene contains baked combined mesh (~129 MB) - store via Git LFS
+Assets/FactoryPipePower/Scenes/FactoryPipe_Power.unity filter=lfs diff=lfs merge=unityyamlmerge -text
