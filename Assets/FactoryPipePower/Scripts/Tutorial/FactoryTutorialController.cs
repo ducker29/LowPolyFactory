@@ -59,6 +59,7 @@ namespace FactoryPipePower
         [SerializeField] RectTransform handMessageGroup;
         [SerializeField] Image messageBackdrop;
         [SerializeField] float backdropPadding = 10f;
+        [SerializeField] float backdropHorizontalExtraPadding = 8f;
         [SerializeField] Vector2 handAnchorOffset = new Vector2(0f, 0f);
         [SerializeField] float textUnderHandOffset = 30f;
         [SerializeField] float textCenterScreenOffset = 50f;
@@ -887,7 +888,7 @@ namespace FactoryPipePower
                 return;
             }
 
-            float width = contentWidth + backdropPadding * 2f;
+            float width = contentWidth + (backdropPadding + backdropHorizontalExtraPadding) * 2f;
             float height = contentHeight + backdropPadding * 2f;
 
             RectTransform backdropRect = messageBackdrop.rectTransform;

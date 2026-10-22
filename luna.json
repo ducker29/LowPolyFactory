@@ -126,7 +126,11 @@
                 "Stubs/AppsFlyer",
                 "Stubs/IronSource",
                 "Stubs/Vungle",
-                "Stubs/MoreMountains.NiceVibrations"
+                "Stubs/MoreMountains.NiceVibrations",
+                "Assets/UnityTechnologies/ParticlePack/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset",
+                "Assets/UnityTechnologies/ParticlePack/TextMesh Pro/Resources/Sprite Assets/InlineIcons.png",
+                "Assets/UnityTechnologies/ParticlePack/TextMesh Pro/Sprites/EmojiOne.png",
+                "Assets/UnityTechnologies/ParticlePack/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset"
             ],
             "includes": [
                 "Assets/Resources/DOTweenSettings.asset",
@@ -30730,26 +30734,6 @@
                     "ext": ""
                 },
                 "overrides": [
-                    {
-                        "maxWidth": 512,
-                        "maxHeight": 512,
-                        "format": "png32",
-                        "compression": "none",
-                        "quality": 65,
-                        "script": "",
-                        "ext": "",
-                        "name": "Resources/unity_builtin_extra/Default-Particle"
-                    },
-                    {
-                        "maxWidth": 512,
-                        "maxHeight": 512,
-                        "format": "png32",
-                        "compression": "none",
-                        "quality": 65,
-                        "script": "",
-                        "ext": "",
-                        "name": "Assets/UnityTechnologies/ParticlePack/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset"
-                    },
                     {
                         "maxWidth": 512,
                         "maxHeight": 512,

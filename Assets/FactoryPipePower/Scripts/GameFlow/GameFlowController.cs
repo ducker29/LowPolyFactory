@@ -21,7 +21,7 @@ namespace FactoryPipePower
         [SerializeField] TutorialController tutorialController;
         [SerializeField] FactoryTutorialController factoryTutorial;
         [SerializeField] float completionDelay = 0.75f;
-        [SerializeField, Min(0f)] float completedScreenDelay = 1.5f;
+        [SerializeField, Min(0f)] float completedScreenDelay = 2f;
 
         GameFlowState state = GameFlowState.Gameplay;
         Coroutine completionRoutine;
